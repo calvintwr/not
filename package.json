@@ -1,0 +1,39 @@
+{
+    "name": "you-are-not",
+    "version": "0.0.1",
+    "description": "Are you what I am looking for? A minimal, fast, intuitive, and customisable type-checking helper.",
+    "main": "index.js",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "mocha './test/' --recursive --exit",
+        "cover": "istanbul cover _mocha -- './test/' --recursive --exit",
+        "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/calvintwr/are-you.git"
+    },
+    "keywords": [
+        "type",
+        "checker",
+        "type",
+        "checking",
+        "typescript",
+        "alternative"
+    ],
+    "author": "calvintwr",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/calvintwr/are-you/issues"
+    },
+    "homepage": "https://github.com/calvintwr/are-you#readme",
+    "devDependencies": {
+        "chai": "^4.2.0",
+        "coveralls": "^3.1.0",
+        "istanbul": "^0.4.5",
+        "mocha": "^7.1.2",
+        "mocha-lcov-reporter": "^1.3.0"
+    }
+}
