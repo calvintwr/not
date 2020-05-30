@@ -87,9 +87,10 @@ someAPIEndPoint((request, respond) => {
 
 }).catch((error) => {
     respond.status = 500
-    respond.send({ error })
+    respond.send({ error }) 
 })
 ```
+Inside `error.trace`, it contains a very human-readable message of all that went wrong, and makes your API super user-friendly. No one needs to lose hair over error message handling.
 ## More options
 ### Customise your message, provide some useful information
 ```js
