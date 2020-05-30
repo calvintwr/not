@@ -48,7 +48,8 @@ This can be very powerful, useful, and saves code for your API response:
 someAPIEndPoint((request, respond) => {
 
     let chk = not(['string', 'number', 'array'], request.payload)
-    // the below will evaluate to true
+    // if payload is not string, number or array
+    // this condition below evaluates true and throws error
     if (chk) throw new Error(chk)
 
 }).catch((error) => {
