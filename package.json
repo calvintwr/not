@@ -1,6 +1,6 @@
 {
     "name": "you-are-not",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Are you what I am looking for? A minimal, fast, intuitive, and customisable type-checking helper.",
     "main": "index.js",
     "directories": {

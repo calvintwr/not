@@ -5,14 +5,14 @@
 [![license](https://img.shields.io/npm/l/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![install size](https://badgen.net/packagephobia/install/you-are-not?style=flat-square)](https://packagephobia.now.sh/result?p=you-are-not)
 
->Are you what I am looking for? A minimal, fast, intuitive, and customisable type-checking helper -- *Not*.
+>Are you what I am looking for? *Not* is a minimal, fast, intuitive, and customisable type-checking helper.
 
 This module has no dependencies.
 
 ## Installation
 
 ```
-npm i you-are-not
+npm i you-are-not --save
 ```
 
 ## Usage - This is meant to replace all your type checking libraries
@@ -26,7 +26,9 @@ let str = 'foo'
 let check = not('string', str)
 console.log(check) // outputs false: means `str` is a 'string'
 ```
-Why the double negative? Because passing is unimpressionable -- there's usually nothing you need to do. Whereas when the check fails, you need to handle it with some error message. This is where *Not* comes in to return a string which prepares the error message, and also evaluates to true. The message takes the form of:
+Why the double negative? Because passing a type check is unimpressionable -- there's usually nothing you need to do. Whereas when the check fails, you need to handle it with some error message.
+
+This is where *Not* comes in to return a string with the prepared error message (fully customisable). And this also evaluates to true so you can use it. The message takes the form of:
 ```
 Invalid Argument: Expect type `string` but got `object`.
 ```  
@@ -45,14 +47,22 @@ This can be very powerful, useful, and saves code for your API response:
 ```js
 someAPIEndPoint((request, respond) => {
 
-    let chkName = not('string', request.name)
+    let chk = not(['string', 'number', 'array'], request.payload)
     // the below will evaluate to true
-    if (chkName) throw new Error(chkName)
+    if (chk) throw new Error(chk)
 
 }).catch((error) => {
     respond.status = 500
     respond.send({ error: error.message })
 })
+```
+
+### No More:
+```js
+if (typeof chk !== 'string' || (typeof chk !== 'number' || (typeof chk=== 'number' && !isNaN(chk))) || !Array.isArray(chk)) {
+    let error = "Not a valid type. But what was it? I don't know."
+    throw new Error(error)
+}
 ```
 
 ### Real World API Tower of Params
