@@ -1,15 +1,17 @@
 {
     "name": "you-are-not",
-    "version": "0.0.2",
-    "description": "Are you what I am looking for? A minimal, fast, intuitive, and customisable type-checking helper.",
+    "version": "0.3.1",
+    "description": "Write accurate code. Meet deadlines. Maintain type flexibility. No compiling. A minimal, blazing fast, intuitive, and customisable type-checking helper that you are missing.",
     "main": "index.js",
+    "browserslist": "> 0.25%, not dead",
     "directories": {
         "test": "test"
     },
     "scripts": {
-        "test": "mocha './test/' --recursive --exit",
-        "cover": "istanbul cover _mocha -- './test/' --recursive --exit",
-        "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+        "test": "mocha './test/' --recursive --exit -r esm",
+        "cover": "istanbul cover _mocha -- './test/' --recursive --exit -r esm",
+        "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+        "build": "bili --format umd --module-name Not --input index.js --file-name not.js; bili --format umd --module-name Not --input index.js --file-name not.min.js --minify"
     },
     "repository": {
         "type": "git",
@@ -17,11 +19,16 @@
     },
     "keywords": [
         "type",
+        "typing",
+        "validate",
+        "validation",
+        "check",
         "checker",
-        "type",
         "checking",
         "typescript",
-        "alternative"
+        "error",
+        "not",
+        "you-are-not"
     ],
     "author": "calvintwr",
     "license": "MIT",
@@ -30,10 +37,15 @@
     },
     "homepage": "https://github.com/calvintwr/are-you#readme",
     "devDependencies": {
+        "bili": "^4.10.0",
         "chai": "^4.2.0",
         "coveralls": "^3.1.0",
+        "esm": "^3.2.25",
         "istanbul": "^0.4.5",
         "mocha": "^7.1.2",
         "mocha-lcov-reporter": "^1.3.0"
-    }
+    },
+    "files": [
+        "index.js"
+    ]
 }

@@ -1,22 +1,23 @@
 /*!
- * You-Are-Not v0.0.2
+ * You-Are-Not v0.3.1
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
 'use strict'
 
-const Not = {
+const You = {
     opinionatedOnNaN: true,
     opinionatedOnArray: true,
     opinionatedOnNull: true,
     opinionatedOnString: true,
-    _opinionated: true
+    _isOpinionated: true,
+    willThrowError: true
 }
 
-Object.defineProperty(Not, 'opinionated', {
-    get() { return this._opinionated },
+Object.defineProperty(You, 'isOpinionated', {
+    get() { return this._isOpinionated },
     set(value) {
-        this._opinionated = value
+        this._isOpinionated = value
         this.opinionatedOnNaN = value
         this.opinionatedOnArray = value
         this.opinionatedOnNull = value
@@ -24,27 +25,49 @@ Object.defineProperty(Not, 'opinionated', {
     }
 })
 
-Not.checker = function(expect, got, name, note) {
+You.areNot = function(expect, got, name, note) {
     if (!Array.isArray(expect)) expect = [expect]
     got = this.type(got)
     if (this.found(expect, got)) return false
-    return this.msg(expect, got, name, note)
+    let msg = this.msg(expect, got, name, note)
+    if (this.willThrowError) throw TypeError(msg)
+    return msg
 }
-Not.found = function(expect, got) {
+
+You.isNot = function(expect, got, name, note) {
+    return this.areNot(expect, got, name, note)
+}
+You.not = function(expect, got, name, note) {
+    return this.areNot(expect, got, name, note)
+}
+
+You.are = function(expect, got) {
+    try {
+        let chk = this.areNot(expect, got)
+        if (typeof chk === 'string') return false
+        return true
+    } catch (error) { return false }
+}
+
+You.is = function(expect, got) {
+    return this.are(expect, got)
+}
+
+You.found = function(expect, got) {
     if (typeof got == 'string') got = [got]
     let found = expect.find(el => got.indexOf(this.vet(el)) !== -1 )
     return typeof found !== 'undefined'
 }
 
-Not.msg = function(expect, got, name, note) {
-    let msg = 'Invalid Argument'
+You.msg = function(expect, got, name, note) {
+    let msg = 'Wrong Type' // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
     msg += name ? ` (${name})` : ''
-    msg += `: Expect type ${this.list(expect)} but got ${this.list(got)}.`
+    msg += `: Expecting type ${this.list(expect)} but got ${this.list(got)}.`
     msg += note ? ` Note: ${note}.` : ''
     return msg
 }
 
-Not.vet = function(el) {
+You.vet = function(el) {
     const valid = [
         'string',
         'number',
@@ -57,12 +80,12 @@ Not.vet = function(el) {
         'undefined'
         // no support for symbol. should we care?
     ]
-    if (typeof el !== 'string') throw new Error(`Internal error: Say what you expect to check as a string. Found ${this.list(this.type(el), 'as')}.`)
-    if (valid.indexOf(el.toLowerCase()) === -1) throw new Error(`Internal error: \`${el}\` is not a valid type to check for. Please use only ${this.list(valid)}.`)
+    if (typeof el !== 'string') throw TypeError(`Internal error: Say what you expect to check as a string. Found ${this.list(this.type(el), 'as')}.`)
+    if (valid.indexOf(el.toLowerCase()) === -1) throw Error(`Internal error: \`${el}\` is not a valid type to check for. Please use only ${this.list(valid)}.`)
     return el
 }
 
-Not.list = function(array, conjunction) {
+You.list = function(array, conjunction) {
     if (!conjunction) conjunction = 'or'
     if (typeof array === 'string') array = [array]
     array = array.map(el => {
@@ -73,7 +96,7 @@ Not.list = function(array, conjunction) {
     return `${array.slice(0, -1).join(', ')} ${conjunction} ${array.slice(-1)}`
 }
 
-Not.type = function(got) {
+You.type = function(got) {
 
     // sort out the NaN problem.
     if (typeof got !== 'object') {
@@ -114,8 +137,53 @@ Not.type = function(got) {
     return 'object'
 }
 
-Not.create = function() {
-    return this.checker.bind(this)
+You.lodge = function(expect, got, name, note) {
+    // when using ingest you want to mute throwing errors.
+    this._oldValue_willThrowError = this.willThrowError
+    this.willThrowError = false
+
+    if (!this._lodged) this._lodged = []
+    let ingestation = this.areNot(expect, got, name, note)
+    if (ingestation) this._lodged.push(ingestation)
+
+    // revert
+    this.willThrowError = this._oldValue_willThrowError
+    this._oldValue_willThrowError = null
 }
 
-module.exports = Object.create(Not)
+You.resolve = function(callback) {
+    if (this._lodged === undefined || this._lodged.length === 0) return false
+    let errors = TypeError('Wrong types provided. See `trace`.')
+    errors.trace = this._lodged
+    if (typeof callback === 'function') return callback(errors)
+    if (this.willThrowError) throw errors
+    return errors.trace
+}
+
+You.create = function(options) {
+    let you = Object.create(this)
+    this._applyOptions(you, options)
+    return you.areNot.bind(you)
+}
+
+You.createNot = function(options) {
+    return this.create(options)
+}
+You.createIs = function(options) {
+    let you = Object.create(this)
+    this._applyOptions(you, options)
+    return you.are.bind(you)
+}
+You._applyOptions = function (instance, options) {
+    if (this.__proto__.is === undefined) throw Error('You are directly using the prototype which is not allowed. Please use #Object.create() to extend this prototype.')
+    if(this.__proto__.is('object', options)) {
+        if(this.__proto__.is('boolean', options.opinionatedOnNaN)) instance.opinionatedOnNaN = options.opinionatedOnNaN
+        if(this.__proto__.is('boolean', options.opinionatedOnArray)) instance.opinionatedOnArray = options.opinionatedOnArray
+        if(this.__proto__.is('boolean', options.opinionatedOnNull)) instance.opinionatedOnNull = options.opinionatedOnNull
+        if(this.__proto__.is('boolean', options.opinionatedOnString)) instance.opinionatedOnString = options.opinionatedOnString
+        if(this.__proto__.is('boolean', options.isOpinionated)) instance.isOpinionated = options.isOpinionated
+        if(this.__proto__.is('boolean', options.willThrowError)) instance.willThrowError = options.willThrowError
+    }
+}
+
+export default Object.create(You)
