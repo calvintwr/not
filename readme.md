@@ -35,10 +35,10 @@ Wrong Type: Expecting `number` but got `string`.
 Typescript brings back compiling (*yucks!*), and doesn't check at runtime.
 
 ### Restore Javascript Flexibility
-Unlock flexibility of Javascript, where typing need not be strict, and functions are made powerful by being able accepting different types.
+Unlock flexibility of Javascript, where typing need not be strict, and functions/APIs are made powerful by being able to accept argument different types.
 
 ### Meet Deadlines With Accurate Code
-Write good code quickly; find the **balance** in code accuracy, and writing speed, leveraging flexibility that Javascript has intended for.
+Write good code quickly; find the **balance** in code accuracy and writing speed. Leverage flexibility that Javascript has intended for.
 
 
 ## Installation
@@ -48,17 +48,20 @@ npm i --save you-are-not
 ```
 
 ## Double Negative Mechanism Explained
-*Not* prefers a "double negative" mechanism which is more powerful. It returns a definitive `false` when the check passes -- exactly because you usually don't need to do anything. *(Actually, you are most probably already using double negatives, but in a dangerous way like `!check`, where `check` can be 0 or null, which are falsey but not false.)*
+*Not* prefers a more powerful "double negative" mechanism, to definitively return `false` when the check passes. It follows the sensible human logic -- "Let's check if something is wrong (not what I want), so that I will do something. Nope, lets move on":
+```js
+if (not('string', 'i am string')) // do something
+// Nope, let's move on.
+```, 
 
-When *Not* fails, it throws an error, or can be made to return a `string` -- **this can be used to evaluate to `true` to perform some operations!**
+When *Not* fails, it throws an error by default. Or, you can cleverly return a `string` **which can be used to evaluate to `true` to perform some operations!**
 ```js
 const not = Not.create({ willThrowError: false })
 // instead of throwing, `not` will return string
 
 let input  = ['a', 'sentence']
-let result = not('string', input)
+let result = not('string', input) // returns a string, which can evaluate `true`
 
-// result evaluates true
 if (result) input = input.join(' ')
 // so you can do your own error handling, or transformation
 
@@ -106,13 +109,25 @@ Will throw:
 ```
 ! Wrong Type (FOO): Expect type `string` but got `array`. [MESSAGE or TIMESTAMP].
 ```
+#### The valid types you can check for are:
+```js
+'string'
+'number'
+'nan' // this is an opinion. NaN should not be of type number in the literal sense.
+'array'
+'object'
+'function'
+'boolean'
+'null'
+'undefined'
+```
 ### *Not* Also Has `#is`
 ```js
 let is = Not.createIs()
 is('array', []) // returns true
 is('number', NaN) // returns false
-// not that
 ```
+Because `#is` needs to return true when the check passes, it is not as powerful as `#not`.
 ### Example - Checking Multiple Types
 Instead of the horrible:
 ```js
@@ -129,12 +144,13 @@ if (
 You write:
 ```js
 not(['string', 'number', 'array'], foo)
+// or
 is(['string', 'number', 'array'], foo)
 ```
 
-### Need Heavy Lifting? Bulk Check Neatly
-#### With `#lodge` And `#resolve`
-In the real world, the our API params checking is a ~~leaning~~ tower of code. *Not* makes it neat, produces super user-friendly error messages. *No one loses hair*:
+### Need Heavy Lifting? Bulk Check (With Neat Coding)
+#### Using `#lodge` And `#resolve`
+In the real world, the our API params checking is a ~~leaning~~ tower of code. *Not* makes it neat and produces super user-friendly error messages. *No one loses hair*:
 ```js
 const Not = require('you-are-not')
 someAPIEndPoint((request, response) => {
@@ -175,8 +191,8 @@ let list = apiNot.resolve()
 // `list` will contain an array of error messages
 ```
 
-## Options - *Not*'s Type Checking Logic
-#### Javscript typing has a few quirks:
+## Options - *Not*'s Type-Checking Logic ("Opinions")
+#### Native Javscript typing has a few quirks:
 ```js
 typeof [] // object
 typeof null // object
@@ -185,8 +201,8 @@ typeof NaN // number
 Those are technically not wrong (or debatable), but often gets in the way.
 
 #### By default, *Not* will apply the following treatment:
-1. `NaN` is not a **'number'**.
-2. `Array` and `[]` are type **'array'** and not an **'object'**.
+1. `NaN` is not a **'number'**, and will be **'nan'**.
+2. `Array` and `[]` are of **'array'** type, and not **'object'**.
 3. `null` is **'null'** and not an **'object'**.
 4. Instance of `#String` is **'string'** and not an **'object'**.
 
@@ -195,10 +211,11 @@ You can switch off opinionated type-checking:
 ```js
 let not = Not.create({ isOpinionated: false })
 ```
-When false, all Javascript the quirks will be restored, but some of *Not*'s opinions are retained: An `Array` will both be an **'array'** as well as **'object'**:
+When false, all Javascript the quirks will be restored, on top of *Not*'s opinions: An `Array` will both be an **'array'** as well as **'object'**, and `null` will both be **'null'** and **'object'**:
 ```js
-not('object', []) // returns false -- [] is an object
-not('array', []) // returns false -- [] is an array
+not('object', []) // returns false -- `[]` is an object
+not('array', []) // returns false -- `[]` is an array
+not('object', null) // returns false -- `null` is an object
 ```
 ### Switch Off Opinions Partially
 ```js
