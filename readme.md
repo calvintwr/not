@@ -1,5 +1,5 @@
 
-# Route Magic
+# You Are *Not*
 [![npm version](https://img.shields.io/npm/v/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![Build Status](https://badgen.net/travis/calvintwr/you-are-not?style=flat-square)](https://travis-ci.com/calvintwr/you-are-not)
 [![Coverage Status](https://badgen.net/coveralls/c/github/calvintwr/you-are-not?style=flat-square)](https://coveralls.io/r/calvintwr/you-are-not)
@@ -18,11 +18,17 @@
 const Not = require('you-are-not')
 let not   = Not.create()
 let str   = 'string'
-not('number', str) // throws error
-```
-Will throw:
-```
-Wrong Type: Expecting `number` but got `string`.
+not('number', str) // throws error "Wrong Type: Expecting `number` but got `string`."
+
+//or check objects
+let anotherNot = Object.create(Not)
+let candidateToCheck = { string: 123, number: '123' } // wrong typing.
+let errors = anotherNot.checkObject(
+    'objectName',
+    { string: 'string', number: 'number' },
+    candidateToCheck
+)
+// throws error, errors are organised neatly into an array. under `.trace` property
 ```
 
 ## Why *Not*?
@@ -52,7 +58,7 @@ npm i --save you-are-not
 ```js
 if (not('string', 'i am string')) // do something
 // Nope, let's move on.
-```, 
+```
 
 When *Not* fails, it throws an error by default. Or, you can cleverly return a `string` **which can be used to evaluate to `true` to perform some operations!**
 ```js
@@ -104,13 +110,65 @@ function test(foo, bar) {
 
 let fooNotString = ['foo']
 test(fooNotString)
+// will throw: ! Wrong Type (FOO): Expect type `string` but got `array`. [MESSAGE or TIMESTAMP].
 ```
-Will throw:
+
+### Need Heavy Lifting? Bulk Check Objects
+#### Using `#checkObject`
+In the real world, the our API params checking is a ~~leaning~~ tower of code. *Not* makes it neat and produces super user-friendly error messages. *No one loses hair*:
+```js
+const Not = require('you-are-not')
+someAPIEndPoint((request, response) => {
+
+	/* checking starts */
+    let apiNot = Object.create(Not) // use the full object, don't call #create.
+    apiNot.willThrowError = false
+
+    /* Usage
+    #checkObject(
+        name of object,
+        expectations <object>,
+        what you got <object>,
+        callback <function> [optional]
+    )
+    */
+
+    let errors = apiNot.checkObject('request', {
+        name: 'string',
+        subscribe: 'boolean',
+        info__optional: { // not that for objects that are optional, use "__optional"
+            gender: 'string',
+            age: ['string', 'optional'] // it can be optional, or if present, it must be string.
+        }
+    }, request.body, callback)
+    // provide `callback` if you wish to handle the error yourself.
+
+    if (errors) return response.status(500).send({ error })
+
+    response.status(200).send('Success!')
+
+})
 ```
-! Wrong Type (FOO): Expect type `string` but got `array`. [MESSAGE or TIMESTAMP].
+You can also use `#lodge` And `#resolve` to bulk checking:
+```js
+
+apiNot.lodge('string', request.name, 'name')
+apiNot.lodge('boolean', request.subscribe, 'subscribe')
+apiNot.lodge(['string', 'array'], request.friends, 'friends')
+apiNot.lodge(['number', 'string'], request.age, 'age')
+// and many more lines
+
+apiNot.resolve()
+/* OR */
+apiNot.resolve(errors => {
+    // optional callback, custom handling
+    throw errors
+})
 ```
+
 #### The valid types you can check for are:
 ```js
+Primitives:
 'string'
 'number'
 'nan' // this is an opinion. NaN should not be of type number in the literal sense.
@@ -120,6 +178,9 @@ Will throw:
 'boolean'
 'null'
 'undefined'
+
+Aggregated:
+'optional' // which means 'null' and 'undefined'
 ```
 ### *Not* Also Has `#is`
 ```js
@@ -148,48 +209,8 @@ not(['string', 'number', 'array'], foo)
 is(['string', 'number', 'array'], foo)
 ```
 
-### Need Heavy Lifting? Bulk Check (With Neat Coding)
-#### Using `#lodge` And `#resolve`
-In the real world, the our API params checking is a ~~leaning~~ tower of code. *Not* makes it neat and produces super user-friendly error messages. *No one loses hair*:
-```js
-const Not = require('you-are-not')
-someAPIEndPoint((request, response) => {
-
-	/* checking starts */
-    let apiNot = Object.create(Not) // use the full object, don't call #create.
-
-    apiNot.lodge('string', request.name, 'name')
-    apiNot.lodge('boolean', request.subscribe, 'subscribe')
-    apiNot.lodge(['string', 'array'], request.friends, 'friends')
-    apiNot.lodge(['number', 'string'], request.age, 'age')
-    // and many more lines
-
-	try {
-        apiNot.resolve() // this throws the error
-    } catch (error) {
-        response.status(500).send({ error })
-        // errors are in error.trace
-        return
-    }
-    /* checking ends */
-
-    //nothing fails
-    response.status(200).send('Success!')
-})
-```
-`#resolve` can take a `callback` if you wish to handle the error yourself:
-```js
-apiNot.resolve(errors => {
-    // custom handling
-    throw errors
-})
-```
-You can also switch off error throwing:
-```js
-apiNot.willThrowError = false
-let list = apiNot.resolve()
-// `list` will contain an array of error messages
-```
+### Define your own checks
+This will be implemented soon.
 
 ## Options - *Not*'s Type-Checking Logic ("Opinions")
 #### Native Javscript typing has a few quirks:

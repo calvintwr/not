@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.3.3
+ * You-Are-Not v0.4.0
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -26,7 +26,7 @@ Object.defineProperty(You, 'isOpinionated', {
 })
 
 You.areNot = function(expect, got, name, note) {
-    if (!Array.isArray(expect)) expect = [expect]
+    expect = this.prepareExpect(expect)
     got = this.type(got)
     if (this.found(expect, got)) return false
     let msg = this.msg(expect, got, name, note)
@@ -59,6 +59,28 @@ You.found = function(expect, got) {
     return typeof found !== 'undefined'
 }
 
+You.prepareExpect = function(expect) {
+    if (typeof expect === 'string') {
+        expect = [expect]
+    } else if (!Array.isArray(expect)) {
+        throw TypeError(`Internal error: Say what you expect to check as a string or array of strings. Found ${this.list(this.type(expect), 'as')}.`)
+    }
+    return expect.reduce((r, expect) => {
+        if (typeof expect !== 'string') throw TypeError(`Internal error: Say what you expect to check as a string. Found ${this.list(this.type(expect), 'as')}.`)
+        expect = expect.toLowerCase()
+        return this.mapOptional(r, expect)
+    }, [])
+}
+
+You.mapOptional = function(r, expect) {
+    if (expect !== 'optional') {
+        r.push(expect)
+    } else {
+        r.push('null', 'undefined')
+    }
+    return r
+}
+
 You.msg = function(expect, got, name, note) {
     let msg = 'Wrong Type' // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
     msg += name ? ` (${name})` : ''
@@ -67,7 +89,7 @@ You.msg = function(expect, got, name, note) {
     return msg
 }
 
-You.vet = function(el) {
+You.vet = function(expect) {
     const valid = [
         'string',
         'number',
@@ -80,9 +102,8 @@ You.vet = function(el) {
         'undefined'
         // no support for symbol. should we care?
     ]
-    if (typeof el !== 'string') throw TypeError(`Internal error: Say what you expect to check as a string. Found ${this.list(this.type(el), 'as')}.`)
-    if (valid.indexOf(el.toLowerCase()) === -1) throw Error(`Internal error: \`${el}\` is not a valid type to check for. Please use only ${this.list(valid)}.`)
-    return el
+    if (valid.indexOf(expect.toLowerCase()) === -1) throw Error(`Internal error: \`${expect}\` is not a valid type to check for. Please use only ${this.list(valid)}.`)
+    return expect
 }
 
 You.list = function(array, conjunction) {
@@ -158,6 +179,33 @@ You.resolve = function(callback) {
     if (typeof callback === 'function') return callback(errors)
     if (this.willThrowError) throw errors
     return errors.trace
+}
+
+You.checkObject = function (name, expectObject, gotObject, callback) {
+    let not = Object.create(this)
+    not.walkObject(name, expectObject, gotObject)
+    return not.resolve(callback)
+}
+You.walkObject = function (name, expectObject, gotObject) {
+    for(let i=0, keys = Object.keys(expectObject); i<keys.length; i++) {
+        let key = keys[i]
+        let expect = expectObject[key]
+        let optional = (key.indexOf('__optional') > -1) ? true : false
+        let keyCopy = optional ? key.replace('__optional', '') : key
+        let got = gotObject[keyCopy]
+        //var name = `${name}.${keys[i]}`
+        if (typeof expect === 'object' && expect !== null) {
+            if (typeof got === 'object' && got !== null) {
+                this.walkObject(`${name}.${keyCopy}`, expect, got)
+                continue
+            } else {
+                if (optional) continue
+            }
+            this.lodge('object', got, `${name}.${keyCopy}`)
+            continue
+        }
+        this.lodge(expect, got, `${name}.${keyCopy}`)
+    }
 }
 
 You.create = function(options) {

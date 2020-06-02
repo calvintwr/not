@@ -100,6 +100,21 @@ describe('checking', () => {
             not(['array', 'string'], new String()).should.be.false
         })
 
+        //optional x undefined
+        it('should return false when comparing optional with undefined', () => {
+            not('optional').should.be.false
+        })
+
+        //optional and number x undefined
+        it('should return false when comparing optional or number with null', () => {
+            not(['optional', 'number'], null).should.be.false
+        })
+
+        //optional and number x undefined
+        it('should return false when comparing optional or number with number', () => {
+            not(['optional', 'number'], 123).should.be.false
+        })
+
         it('should throw error when passing expect as non-string', () => {
             (()=> {
                 not([[], 'string'], new String())
@@ -110,11 +125,7 @@ describe('checking', () => {
     describe('checking - not opinionated via #createNot', () => {
         let not2 = Object.create(Not)
         not2.isOpinionated = false
-        console.log(not2)
         let notOpinionated = not2.createNot()
-        // const notOpinionated = Not.createNot({
-        //     isOpinionated: false
-        // })
 
         //string x string
         it('should return false when comparing string', () => {
@@ -377,4 +388,123 @@ describe('resolve', () => {
             you3.resolve()
         }).should.Throw(TypeError, 'Wrong types provided. See `trace`.')
     })
+})
+
+describe('prepareExpect', () => {
+
+    it('should map string "optional" in `expect` into "null" and "undefined"', () => {
+        Not.prepareExpect([
+            'undefined',
+            'object',
+            'optional'
+        ]).should.be.an('array').that.include.members([
+            'undefined',
+            'object',
+            'null',
+            'undefined'
+        ])
+    })
+
+})
+
+describe('checkObject', () => {
+
+    it('should return false when objects (no optionals) match', () => {
+        Not.checkObject('noOptionals', {
+            string: 'string',
+            null: 'null',
+            object: {
+                object: {
+                    number: 'number',
+                    boolean: 'boolean'
+                }
+            }
+        }, {
+            string: 'string',
+            null: null,
+            object: {
+                object: {
+                    number: 123,
+                    boolean: false
+                }
+            }
+        }).should.be.false
+    })
+
+    it('should return false when objects (with optionals) match', () => {
+        Not.checkObject('optionals', {
+            string: 'string',
+            null: 'null',
+            object: {
+                object: {
+                    number: 'number',
+                    boolean: 'boolean'
+                }
+            },
+            optional__optional: { array: 'array' }
+        }, {
+            string: 'string',
+            null: null,
+            object: {
+                object: {
+                    number: 123,
+                    boolean: false
+                }
+            },
+            optional: { array: [] }
+        }).should.be.false
+    })
+
+    it('should return error array when objects (with optionals) do not match', () => {
+        let errors = Not.checkObject('optionalsNoMatch', {
+            string: 'string',
+            null: 'null',
+            object: {
+                object: {
+                    number: 'number',
+                    boolean: 'boolean'
+                }
+            },
+            compulsoryObject: {
+                missing: 1
+            },
+            optional__optional: { array: 'array' }
+        }, {
+            string: [],
+            null: false,
+            object: {
+                object: {
+                    number: [],
+                    boolean: function() {},
+                    extraProperty: 'string'
+                }
+            },
+            optional: { array: [] }
+        })
+
+        errors.should.be.an('array')
+        errors.length.should.equal(5)
+        errors.should.include.members([
+            'Wrong Type (optionalsNoMatch.string): Expecting type `string` but got `array`.',
+            'Wrong Type (optionalsNoMatch.null): Expecting type `null` but got `boolean`.',
+            'Wrong Type (optionalsNoMatch.object.object.number): Expecting type `number` but got `array`.',
+            'Wrong Type (optionalsNoMatch.object.object.boolean): Expecting type `boolean` but got `function`.',
+            'Wrong Type (optionalsNoMatch.compulsoryObject): Expecting type `object` but got `undefined`.'
+        ])
+    })
+
+    it('should return error array when optional object do not match', () => {
+        let errors = Not.checkObject('optionalsMatch', {
+            optional__optional: { array: 'array' }
+        }, {
+            optional: { array: null }
+        })
+
+        errors.should.be.an('array')
+        errors.length.should.equal(1)
+        errors.should.include.members([
+            'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `null`.',
+        ])
+    })
+
 })

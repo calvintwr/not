@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * You-Are-Not v0.3.3
+ * You-Are-Not v0.4.0
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -30,7 +30,7 @@ Object.defineProperty(You, 'isOpinionated', {
 });
 
 You.areNot = function (expect, got, name, note) {
-  if (!Array.isArray(expect)) expect = [expect];
+  expect = this.prepareExpect(expect);
   got = this.type(got);
   if (this.found(expect, got)) return false;
   var msg = this.msg(expect, got, name, note);
@@ -70,6 +70,32 @@ You.found = function (expect, got) {
   return typeof found !== 'undefined';
 };
 
+You.prepareExpect = function (expect) {
+  var _this2 = this;
+
+  if (typeof expect === 'string') {
+    expect = [expect];
+  } else if (!Array.isArray(expect)) {
+    throw TypeError("Internal error: Say what you expect to check as a string or array of strings. Found ".concat(this.list(this.type(expect), 'as'), "."));
+  }
+
+  return expect.reduce(function (r, expect) {
+    if (typeof expect !== 'string') throw TypeError("Internal error: Say what you expect to check as a string. Found ".concat(_this2.list(_this2.type(expect), 'as'), "."));
+    expect = expect.toLowerCase();
+    return _this2.mapOptional(r, expect);
+  }, []);
+};
+
+You.mapOptional = function (r, expect) {
+  if (expect !== 'optional') {
+    r.push(expect);
+  } else {
+    r.push('null', 'undefined');
+  }
+
+  return r;
+};
+
 You.msg = function (expect, got, name, note) {
   var msg = 'Wrong Type'; // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
 
@@ -79,13 +105,12 @@ You.msg = function (expect, got, name, note) {
   return msg;
 };
 
-You.vet = function (el) {
+You.vet = function (expect) {
   var valid = ['string', 'number', 'nan', // this is an opinion. NaN should not be of type number in the literal sense.
   'array', 'object', 'function', 'boolean', 'null', 'undefined' // no support for symbol. should we care?
   ];
-  if (typeof el !== 'string') throw TypeError("Internal error: Say what you expect to check as a string. Found ".concat(this.list(this.type(el), 'as'), "."));
-  if (valid.indexOf(el.toLowerCase()) === -1) throw Error("Internal error: `".concat(el, "` is not a valid type to check for. Please use only ").concat(this.list(valid), "."));
-  return el;
+  if (valid.indexOf(expect.toLowerCase()) === -1) throw Error("Internal error: `".concat(expect, "` is not a valid type to check for. Please use only ").concat(this.list(valid), "."));
+  return expect;
 };
 
 You.list = function (array, conjunction) {
@@ -161,6 +186,36 @@ You.resolve = function (callback) {
   if (typeof callback === 'function') return callback(errors);
   if (this.willThrowError) throw errors;
   return errors.trace;
+};
+
+You.checkObject = function (name, expectObject, gotObject, callback) {
+  var not = Object.create(this);
+  not.walkObject(name, expectObject, gotObject);
+  return not.resolve(callback);
+};
+
+You.walkObject = function (name, expectObject, gotObject) {
+  for (var i = 0, keys = Object.keys(expectObject); i < keys.length; i++) {
+    var key = keys[i];
+    var expect = expectObject[key];
+    var optional = key.indexOf('__optional') > -1 ? true : false;
+    var keyCopy = optional ? key.replace('__optional', '') : key;
+    var got = gotObject[keyCopy]; //var name = `${name}.${keys[i]}`
+
+    if (_typeof(expect) === 'object' && expect !== null) {
+      if (_typeof(got) === 'object' && got !== null) {
+        this.walkObject("".concat(name, ".").concat(keyCopy), expect, got);
+        continue;
+      } else {
+        if (optional) continue;
+      }
+
+      this.lodge('object', got, "".concat(name, ".").concat(keyCopy));
+      continue;
+    }
+
+    this.lodge(expect, got, "".concat(name, ".").concat(keyCopy));
+  }
 };
 
 You.create = function (options) {
