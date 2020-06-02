@@ -16,7 +16,7 @@
         "cover": "istanbul cover _mocha -- './test/' --recursive --exit -r esm",
         "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
         "browserify": "browserify src/index.js > dist/not.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
-        "browserify:minify": "browserify src/index.js > dist/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
+        "browserify:minify": "browserify src/index.js > dist/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ] -p tinyify",
         "build": "npm run browserify && npm run browserify:minify"
     },
     "repository": {
@@ -52,10 +52,12 @@
         "esm": "^3.2.25",
         "istanbul": "^0.4.5",
         "mocha": "^7.1.2",
-        "mocha-lcov-reporter": "^1.3.0"
+        "mocha-lcov-reporter": "^1.3.0",
+        "tinyify": "^2.5.2"
     },
     "files": [
         "index.js",
-        "src"
+        "src",
+        "dist"
     ]
 }
