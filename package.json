@@ -1,6 +1,6 @@
 {
     "name": "you-are-not",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Write accurate code. Meet deadlines. Maintain type flexibility. No compiling. A minimal, blazing fast, intuitive, and customisable type-checking helper that you are missing.",
     "main": "index.js",
     "browser": "dist/not.min.js",
@@ -21,7 +21,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/calvintwr/are-you.git"
+        "url": "git+https://github.com/calvintwr/you-are-not.git"
     },
     "keywords": [
         "type",
@@ -39,9 +39,9 @@
     "author": "calvintwr",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/calvintwr/are-you/issues"
+        "url": "https://github.com/calvintwr/you-are-not/issues"
     },
-    "homepage": "https://github.com/calvintwr/are-you#readme",
+    "homepage": "https://github.com/calvintwr/you-are-not#readme",
     "devDependencies": {
         "@babel/core": "^7.10.2",
         "@babel/preset-env": "^7.10.2",

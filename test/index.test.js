@@ -111,6 +111,11 @@ describe('checking', () => {
         })
 
         //optional and number x undefined
+        it('should return error message when comparing optional with function', () => {
+            not('optional', function(){}).should.equal('Wrong Type: Expecting type `optional(null or undefined)` but got `function`.')
+        })
+
+        //optional and number x undefined
         it('should return false when comparing optional or number with number', () => {
             not(['optional', 'number'], 123).should.be.false
         })
@@ -355,19 +360,30 @@ describe('lodge', () => {
     you.lodge('string', new String())
     you.lodge('array', {})
 
-    //number
     it('should have _lodged array of length 1', () => {
         you._lodged.should.be.an('array')
         you._lodged.length.should.equal(1)
     })
+
+    it('should return false when comparing matching case', () => {
+        let you2 = Object.create(Not)
+        you2.lodge('null', null).should.be.false
+    })
+
 })
 
 describe('resolve', () => {
 
     const you = Object.create(Not)
     you.lodge('string', new String())
-    it('should not resolve callback when all lodged cases pass', () => {
-        you.resolve(errors => { return true }).should.be.false
+    it('should resolve callback with payload when all lodged cases pass (payload should be undefined. returns what callback returns)', () => {
+        let returned = you.resolve((errors, payload) => { return [ errors, payload ] })
+            returned.should.be.an('array')
+            returned.length.should.equal(2)
+            returned.should.include.members([
+                false,
+                undefined
+            ])
     })
 
     const you2 = Object.create(Not)
@@ -375,8 +391,8 @@ describe('resolve', () => {
     you2.lodge('array', {})
     it('should resolve callback when there are failed lodged cases', () => {
         let errors = you2.resolve(errors => { return errors })
-        errors.trace.should.be.an('array')
-        errors.trace.length.should.equal(1)
+        errors.should.be.an('array')
+        errors.length.should.equal(1)
     })
 
     const you3 = Object.create(Not)
@@ -400,11 +416,9 @@ describe('prepareExpect', () => {
         ]).should.be.an('array').that.include.members([
             'undefined',
             'object',
-            'null',
-            'undefined'
+            '$$custom_optional'
         ])
     })
-
 })
 
 describe('checkObject', () => {
@@ -506,5 +520,203 @@ describe('checkObject', () => {
             'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `null`.',
         ])
     })
+
+    it('should return error array when optional object do not match', () => {
+        let errors = Not.checkObject('optionalsMatch', {
+            optional__optional: { array: 'array' }
+        }, {
+            optional: { array: null }
+        })
+
+        errors.should.be.an('array')
+        errors.length.should.equal(1)
+        errors.should.include.members([
+            'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `null`.',
+        ])
+    })
+
+    it('should return error array when optional object do not match, even if returnPayload is true', () => {
+        let not = Object.create(Not)
+        let schema = {
+            optional__optional: { array: 'array' }
+        }
+
+        let payload = {
+            optional: { array: 123 }
+        }
+
+        let errors = not.checkObject(
+            'optionalsMatch',
+            schema,
+            payload,
+            { returnPayload: true }
+        )
+
+        errors.should.be.an('array')
+        errors.length.should.equal(1)
+        errors.should.include.members([
+            'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `number`.',
+        ])
+    })
+
+    it('should return and sanitise payload (returnPayload = true) when objects match - deep nesting', () => {
+        let not = Object.create(Not)
+        let testFn = function() {}
+        let schema = {
+            optional__optional: { array: 'array'},
+            object: { nested: 'function' }
+        }
+
+        let payload = {
+            optional: { array: [] },
+            object: { nested: testFn },
+            toBeSanitised: 'test'
+        }
+
+        let sanitised = not.checkObject(
+            'optionalsMatch',
+            schema,
+            payload,
+            { returnPayload: true }
+        )
+        sanitised.should.be.an('object')
+        sanitised.should.deep.equal({ optional: { array: [] }, object: { nested: testFn } })
+    })
+
+    it('should return and sanitise payload (returnPayload = true) and drop branches when there are no valid values', () => {
+        let not = Object.create(Not)
+        let schema = {
+            optionalSanitise__optional: { array: ['array', 'optional'] }
+        }
+
+        let payload = {
+            optionalSanitise: { noMatch: '1', noMatch2: 2 },
+        }
+
+        let sanitised = not.checkObject(
+            'optionalsMatch',
+            schema,
+            payload,
+            { returnPayload: true }
+        )
+        sanitised.should.be.an('object')
+        sanitised.should.deep.equal({})
+    })
+
+    it('should return false when there are no valid values', () => {
+        let not = Object.create(Not)
+        let schema = {
+            optionalSanitise__optional: { array: ['array', 'optional'] },
+            compulsorySanitise: { array: ['array', 'optional'] }
+        }
+
+        let payload = {
+            optionalSanitise: { noMatch: '1', noMatch2: 2 },
+            compulsorySanitise: { noMatch: {
+                nested: {
+                    foo: 'bar'
+                }
+            }}
+        }
+
+        not.checkObject(
+            'optionalsMatch',
+            schema,
+            payload
+        ).should.be.false
+    })
+})
+
+describe('defineType', () => {
+
+    it('should return false when number is more than one', () => {
+        let not = Object.create(Not)
+
+        not.defineType({
+            primitive: 'number',
+            type: 'numbermorethanone',
+            pass: function(got) {
+                return got > 1
+            }
+        })
+        not.not('numbermorethanone', 10).should.be.false
+    })
+
+    it('should return false when is string or array of length 5', () => {
+        let not = Object.create(Not)
+
+        not.defineType({
+            primitive: ['string', 'array'],
+            type: 'length_five',
+            pass: function(got) {
+                return got.length === 5
+            }
+        })
+        not.not(['length_five', 'string'], [1,2,3,4,5]).should.be.false
+    })
+
+    it('should return false when is string or array of length 5 using #pass', () => {
+        let not = Object.create(Not)
+
+        not.defineType({
+            primitive: ['string', 'array'],
+            type: 'length_five',
+            pass: function(got) {
+                return got.length === 5
+            }
+        })
+        not.not(['length_five', 'string'], [1,2,3,4,5]).should.be.false
+    })
+
+    it('should return false when is string or array of length 5 using #pass, but checking for `function`', () => {
+        let not = Object.create(Not)
+
+        not.defineType({
+            primitive: ['string', 'array'],
+            type: 'length_five',
+            pass: function(got) {
+                return got.length === 5
+            }
+        })
+        not.not(['length_five', 'function'], function() {}).should.be.false
+    })
+
+    it('should return error message (#not) or false (#is) for custom integer test of 4.4', () => {
+        let not = Object.create(Not)
+
+        not.defineType({
+            primitive: 'number',
+            type: 'integer',
+            pass: function(candidate) {
+                return candidate.toFixed(0) === candidate.toString()
+            }
+        })
+        not.not('integer', 4.4).should.equal('Wrong Type: Expecting type `custom:integer` but got `number`.')
+        not.is('integer', 4.4).should.be.false
+    })
+
+    it('should return error message (#not) or false (#is) falsey check', () => {
+        let not = Object.create(Not)
+
+        not.defineType({
+            primitive: ['null', 'undefined', 'boolean', 'object', 'nan', 'array' ],
+            type: 'falsey',
+            pass: function(candidate) {
+                if (not.is('object', candidate)) return Object.keys(candidate).length === 0
+                if (not.is('array', candidate)) return candidate.length === 0
+                if (not.is('boolean', candidate)) return candidate === false
+                // its the other primitives null, undefined and nan
+                // which is to be passed as falsey straight away without checking
+                return true
+            }
+        })
+
+        not.not('falsey', {}).should.be.false
+        not.not('falsey', [null]).should.equal('Wrong Type: Expecting type `custom:falsey` but got `array`.')
+        not.is('falsey', []).should.be.true
+        not.is('falsey', undefined).should.be.true
+        not.is(['falsey', 'function'], function() {}).should.be.true
+    })
+
 
 })

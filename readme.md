@@ -22,13 +22,16 @@ not('number', str) // throws error "Wrong Type: Expecting `number` but got `stri
 
 //or check objects
 let anotherNot = Object.create(Not)
+let schema = {
+    { string: 'string', number: 'number' } // a schema that replicates intuitively your object structure
+}
 let candidateToCheck = { string: 123, number: '123' } // wrong typing.
 let errors = anotherNot.checkObject(
     'objectName',
-    { string: 'string', number: 'number' },
+    schema,
     candidateToCheck
 )
-// throws error, errors are organised neatly into an array. under `.trace` property
+// throws error, errors are organised neatly into an array.
 ```
 
 ## Why *Not*?
@@ -131,6 +134,18 @@ someAPIEndPoint((request, response) => {
         what you got <object>,
         callback <function> [optional]
     )
+
+    or
+
+    #checkObject(
+        name of object,
+        expectations <object>,
+        what you got <object>,
+        {
+            callback <function> [optional],
+            returnPayload <boolean> [optional]
+        }
+    )
     */
 
     let errors = apiNot.checkObject('request', {
@@ -144,12 +159,36 @@ someAPIEndPoint((request, response) => {
     // provide `callback` if you wish to handle the error yourself.
 
     if (errors) return response.status(500).send({ error })
-
     response.status(200).send('Success!')
 
 })
 ```
-You can also use `#lodge` And `#resolve` to bulk checking:
+*Not* can sanitise your payload:
+```js
+let schema = {
+    name: 'string',
+    subscribe: 'boolean',
+    info__optional: {
+        gender: 'string',
+        age: ['string', 'optional']
+    }
+}
+let sanitised = apiNot.checkObject(
+    'request',
+    schema,
+    payload, {
+        callback: function(errors, payload) { ... },
+        returnPayload: true
+    }
+})
+
+// if is array, means something failed.
+if(Array.isArray(sanitised)) throw sanitised
+
+doSomethingWithYourPayload(sanitised)
+
+```
+You can also use `#lodge` And `#resolve` to bulk checking with more control:
 ```js
 
 apiNot.lodge('string', request.name, 'name')
@@ -210,7 +249,38 @@ is(['string', 'number', 'array'], foo)
 ```
 
 ### Define your own checks
-This will be implemented soon.
+```js
+let not = Object.create(Not)
+
+not.defineType({
+    primitive: 'number', // you must define your primitives
+    type: 'integer', // name your test
+    pass: function(candidate) {
+        return candidate.toFixed(0) === candidate.toString()
+    }
+})
+not.not('integer', 4.4) // gives error message
+not.is('integer', 4.4) // returns false
+
+not.defineType({
+    primitive: ['null', 'undefined', 'boolean', 'object', 'nan', 'array' ],
+    type: 'falsey',
+    pass: function(candidate) {
+        if (not.is('object', candidate)) return Object.keys(candidate).length === 0
+        if (not.is('array', candidate)) return candidate.length === 0
+        if (not.is('boolean', candidate)) return candidate === false
+        // its the other primitives null, undefined and nan
+        // which is to be passed as falsey straight away without checking
+        return true
+    }
+})
+
+not.not('falsey', {}) // returns false
+not.not('falsey', [null]) // returns error message
+not.is('falsey', []) // returns true
+not.is('falsey', undefined) // returns true
+not.is(['falsey', 'function'], function() {}) // returns true
+```
 
 ## Options - *Not*'s Type-Checking Logic ("Opinions")
 #### Native Javscript typing has a few quirks:
