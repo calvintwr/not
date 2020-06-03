@@ -44,7 +44,7 @@ let errors = anotherNot.checkObject(
 Typescript brings back compiling (*yucks!*), and doesn't check at runtime.
 
 ### Restore Javascript Flexibility
-Unlock flexibility of Javascript, where typing need not be strict, and functions/APIs are made powerful by being able to accept argument different types.
+Unlock flexibility of Javascript, where typing need not be strict, and functions/APIs are made powerful by being able to accept different argument types.
 
 ### Meet Deadlines With Accurate Code
 Write good code quickly; find the **balance** in code accuracy and writing speed. Leverage flexibility that Javascript has intended for.
@@ -166,11 +166,16 @@ someAPIEndPoint((request, response) => {
 *Not* can sanitise your payload:
 ```js
 let schema = {
-    name: 'string',
-    subscribe: 'boolean',
-    info__optional: {
-        gender: 'string',
-        age: ['string', 'optional']
+    valid: 'string',
+    toSanitise: {
+        keepThis: 'array'
+    }
+}
+let payload = {
+    valid: 'abc',
+    toSanitise: {
+        keepThis: [],
+        omitThis: 123
     }
 }
 let sanitised = apiNot.checkObject(
