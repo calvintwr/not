@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![install size](https://badgen.net/packagephobia/install/you-are-not?style=flat-square)](https://packagephobia.now.sh/result?p=you-are-not)
 
->*Not* is a minimal, blazing fast, intuitive, and customisable type-checking helper. Meet project deadlines. Code with accuracy. No compiling required. *Not* checks at runtime, unlike Typescript.
+>*Not* is a minimal, blazing fast, intuitive, and customisable type-checking helper. Meet project deadlines. Code with accuracy. No compiling required. *Not* checks at runtime, useful to complement Typescript.
 
 *This module has no dependencies.*
 
@@ -38,13 +38,13 @@ let errors = anotherNot.checkObject(
 
 ### Let's face it, we seldom type-check, because we're missing something.
 
-*Not* is **that** small and convenient type-checking validation library you have been missing to do just that. It also overcomes JS quirks that gets in the way, like: `typeof null // 'object'`
+*Not* is **that** small and convenient type-checking validation library you have been missing to do just that. It also overcomes JS quirks that gets in the way, like: `typeof null // 'object'`.
 
-### Typescript is not the full solution. With *Not*, You Don't Need Typescript
-Typescript brings back compiling (*yucks!*), and doesn't check at runtime.
+### If you use Typescript, it is not the full solution. *Not* fills in the gap.
+Typescript doesn't check at runtime, you need to complete it with *Not*. Written in full JS and assailed with tests, it doesn't add to your compilation time.
 
-### Restore Javascript Flexibility
-Unlock flexibility of Javascript, where typing need not be strict, and functions/APIs are made powerful by being able to accept different argument types.
+### Restore Javascript Flexibility, Solidify Your Client-Facing APIs.
+Unlock flexibility of Javascript, where typing need not be strict, and functions/APIs (especially client-facing ones) are made powerful by being able to accept different argument types, or error *gracefully*.
 
 ### Meet Deadlines With Accurate Code
 Write good code quickly; find the **balance** in code accuracy and writing speed. Leverage flexibility that Javascript has intended for.
