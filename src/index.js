@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.5.0
+ * You-Are-Not v0.5.1
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -267,8 +267,17 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
     for(let i=0, keys = Object.keys(expectObject); i<keys.length; i++) {
         let key = keys[i]
         let expect = expectObject[key]
-        let optional = (key.indexOf('__optional') > -1) ? true : false
-        let keyCopy = optional ? key.replace('__optional', '') : key
+        let optional = false
+        if (key.indexOf('__optional') > -1) {
+            optional = function replace(key) {
+                return key.replace('__optional', '')
+            }
+        } else if (key.indexOf('?') === key.length-1) {
+            optional = function replace(key) {
+                return key.substring(0, key.length-1)
+            }
+        }
+        let keyCopy = optional ? optional(key) : key
         let got = gotObject[keyCopy]
 
         // if object, walk further in
@@ -287,6 +296,7 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
             this.lodge('object', got, `${name}.${keyCopy}`)
             continue
         }
+        if (optional) expect = Array.isArray(expect) ? expect.push('optional') : [expect, 'optional']
         let fail = this.lodge(expect, got, `${name}.${keyCopy}`)
         if (returnPayload && !fail && got) sanitisedPayload[keyCopy] = got
     }

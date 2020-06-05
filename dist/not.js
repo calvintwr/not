@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * You-Are-Not v0.5.0
+ * You-Are-Not v0.5.1
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -279,8 +279,19 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
   for (var i = 0, keys = Object.keys(expectObject); i < keys.length; i++) {
     var key = keys[i];
     var expect = expectObject[key];
-    var optional = key.indexOf('__optional') > -1 ? true : false;
-    var keyCopy = optional ? key.replace('__optional', '') : key;
+    var optional = false;
+
+    if (key.indexOf('__optional') > -1) {
+      optional = function replace(key) {
+        return key.replace('__optional', '');
+      };
+    } else if (key.indexOf('?') === key.length - 1) {
+      optional = function replace(key) {
+        return key.substring(0, key.length - 1);
+      };
+    }
+
+    var keyCopy = optional ? optional(key) : key;
     var got = gotObject[keyCopy]; // if object, walk further in
     // using typeof and other stuff for speed
 
@@ -302,6 +313,7 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
       continue;
     }
 
+    if (optional) expect = Array.isArray(expect) ? expect.push('optional') : [expect, 'optional'];
     var fail = this.lodge(expect, got, "".concat(name, ".").concat(keyCopy));
     if (returnPayload && !fail && got) sanitisedPayload[keyCopy] = got;
   }

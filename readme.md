@@ -151,7 +151,7 @@ someAPIEndPoint((request, response) => {
     let errors = apiNot.checkObject('request', {
         name: 'string',
         subscribe: 'boolean',
-        info__optional: { // not that for objects that are optional, use "__optional"
+        "info?": { // not that for objects that are optional, use "__optional" or suffix "?".
             gender: 'string',
             age: ['string', 'optional'] // it can be optional, or if present, it must be string.
         }

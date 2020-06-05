@@ -469,6 +469,56 @@ describe('checkObject', () => {
         }).should.be.false
     })
 
+    it('should return false when objects (with optionals using "?") match', () => {
+        Not.checkObject('optionals', {
+            string: 'string',
+            null: 'null',
+            object: {
+                object: {
+                    number: 'number',
+                    boolean: 'boolean'
+                }
+            },
+            "optional?": { array: 'array' }
+        }, {
+            string: 'string',
+            null: null,
+            object: {
+                object: {
+                    number: 123,
+                    boolean: false
+                }
+            },
+            optional: { array: [] }
+        }).should.be.false
+    })
+
+    it('should return false when objects (with optionals using "?") match', () => {
+        Not.checkObject('optionals', {
+            string: 'string',
+            null: 'null',
+            object: {
+                object: {
+                    number: 'number',
+                    boolean: 'boolean',
+                    "optional?": 'string'
+                }
+            },
+            "optional?": { array: 'array' },
+            "anOptionalThatIsMissing?": 'function'
+        }, {
+            string: 'string',
+            null: null,
+            object: {
+                object: {
+                    number: 123,
+                    boolean: false
+                }
+            },
+            optional: { array: [] }
+        }).should.be.false
+    })
+
     it('should return error array when objects (with optionals) do not match', () => {
         let errors = Not.checkObject('optionalsNoMatch', {
             string: 'string',
