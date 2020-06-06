@@ -17,32 +17,28 @@
 ```js
 const Not = require('you-are-not')
 let not   = Not.create()
-let str   = 'string'
 
 function test(str) {
     not('number', str) // throws error "Wrong Type: Expecting `number` but got `string`."
     // continue with your code
 }
 
-let notDontThrowError = Not.create({ willThrowError: false})
-
+let notDontThrowError = Not.create({ willThrowError: false })
 function test2(str) {
-    if (not('number', str)) return false // short circuit your code elegantly at the top.
+    if (notDontThrowError('number', str)) return false // short circuit your code elegantly at the top.
     // continue with your code
 }
 
 //or check objects
 let anotherNot = Object.create(Not)
-let schema = {
-    { string: 'string', number: 'number' } // a schema that replicates intuitively your object structure
-}
-let candidateToCheck = { string: 123, number: '123' } // wrong typing.
+let schema    = { string: 'string', number: 'number' } // a schema that replicates intuitively your object structure
+let candidate = { string: 123,      number: '123' // wrong typing here } 
 let errors = anotherNot.checkObject(
     'objectName',
     schema,
-    candidateToCheck
+    candidate
 )
-// throws error, errors are organised neatly into an array.
+// will throws error, errors are organised neatly into an array.
 
 /* *Not* Also Has `#is` */
 
