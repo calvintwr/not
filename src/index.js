@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.5.2
+ * You-Are-Not v0.5.3
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -361,7 +361,7 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
 }
 
 You.defineType = function(payload) {
-    let sanitised = this.__proto__.checkObject('defineType', {
+    let sanitised = Object.getPrototypeOf(this).checkObject('defineType', {
         primitive: ['string', 'array'],
         type: 'string',
         pass: ['function', 'optional']
@@ -397,17 +397,17 @@ You.createIs = function(options) {
     return you.are.bind(you)
 }
 
-You._applyOptions = function (instance, options) {
+You._applyOptions = function (descendant, options) {
     //using #_are because it's not writable and configurable
     if(this._are('object', options)) {
-        if(this._are('boolean', options.willThrowError)) instance.willThrowError = options.willThrowError
+        if(this._are('boolean', options.willThrowError)) descendant.willThrowError = options.willThrowError
         if(this._are('boolean', options.isOpinionated)) {
-            instance.isOpinionated = options.isOpinionated
+            descendant.isOpinionated = options.isOpinionated
             return
         }
 
         this._opinions.forEach(optionKey => {
-            if (this._are('boolean', options[optionKey])) instance[optionKey] = options[optionKey]
+            if (this._are('boolean', options[optionKey])) descendant[optionKey] = options[optionKey]
         })
     }
 }

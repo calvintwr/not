@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * You-Are-Not v0.5.2
+ * You-Are-Not v0.5.3
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -373,7 +373,7 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
 You.defineType = function (payload) {
   var _this3 = this;
 
-  var sanitised = this.__proto__.checkObject('defineType', {
+  var sanitised = Object.getPrototypeOf(this).checkObject('defineType', {
     primitive: ['string', 'array'],
     type: 'string',
     pass: ['function', 'optional']
@@ -419,20 +419,20 @@ You.createIs = function (options) {
   return you.are.bind(you);
 };
 
-You._applyOptions = function (instance, options) {
+You._applyOptions = function (descendant, options) {
   var _this4 = this;
 
   //using #_are because it's not writable and configurable
   if (this._are('object', options)) {
-    if (this._are('boolean', options.willThrowError)) instance.willThrowError = options.willThrowError;
+    if (this._are('boolean', options.willThrowError)) descendant.willThrowError = options.willThrowError;
 
     if (this._are('boolean', options.isOpinionated)) {
-      instance.isOpinionated = options.isOpinionated;
+      descendant.isOpinionated = options.isOpinionated;
       return;
     }
 
     this._opinions.forEach(function (optionKey) {
-      if (_this4._are('boolean', options[optionKey])) instance[optionKey] = options[optionKey];
+      if (_this4._are('boolean', options[optionKey])) descendant[optionKey] = options[optionKey];
     });
   }
 }; //Aggregators, or default non-primitive checks
