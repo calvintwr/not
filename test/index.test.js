@@ -38,6 +38,11 @@ describe('checking', () => {
                 .should.equal('Wrong Type (NaN test): Expecting type `number` but got `nan`. Note: This is an opinion that NaN should not be number.')
         })
 
+        // number x new #Number(NaN)
+        it('should return failure message comparing #Number(NaN) as a number', () => {
+            not('number', new Number(NaN)).should.equal('Wrong Type: Expecting type `number` but got `nan`.')
+        })
+
         //array x []
         it('should return false when comparing array', () => {
             not('array', [1,2, function() {}]).should.be.false
@@ -73,6 +78,11 @@ describe('checking', () => {
         //boolean x true
         it('should return false when comparing `true` as `bolean`', () => {
             not('boolean', true).should.be.false
+        })
+
+        //boolean x true
+        it('should return false when comparing `new #Boolean` as `bolean`', () => {
+            not('boolean', new Boolean(false)).should.be.false
         })
 
         //bolean x null
@@ -322,6 +332,48 @@ describe('checking', () => {
         })
     })
 
+    describe('checking - not opinionated on number', () => {
+        const noonumber = Not.create({
+            opinionatedOnNumber: false
+        })
+
+        //number x number
+        it('should return false when comparing number', () => {
+            noonumber('number', 1).should.be.false
+        })
+
+        //object x new #Number
+        it('should return false when comparing #Number to object', () => {
+            noonumber('object', new Number('1')).should.be.false
+        })
+
+        //number x new #Number
+        it('should return false when comparing #Number to number', () => {
+            noonumber('number', new Number(1)).should.be.false
+        })
+
+        //number x new #Number(NaN)
+        it('should still be opinionated and return failure message comparing #Number(NaN) as a number', () => {
+            noonumber('number', new Number(NaN)).should.be.false
+        })
+    })
+
+    describe('checking - not opinionated on boolean', () => {
+        const noobool = Not.create({
+            opinionatedOnBoolean: false
+        })
+
+        //bool x bool
+        it('should return false when comparing bool', () => {
+            noobool('boolean', true).should.be.false
+        })
+
+        //bool x new #Boolean
+        it('should return false when comparing #Boolean to object', () => {
+            noobool('object', new Boolean(true)).should.be.false
+        })
+    })
+
     describe('checking - willThrowError turned on', () => {
         const nwt = Not.create({
             willThrowError: true
@@ -351,6 +403,14 @@ describe('createIs', () => {
 
     //number/string x {}
     it('should return false when comparing string or number with object', () => {
+        is(['number', 'string'], {}).should.be.false
+    })
+
+    //number/string x {}
+    it('should not throw error and return false when comparing string or number with object', () => {
+        let defaultNot = Object.create(Not)
+        defaultNot.willThrowError = true
+        let defaultIs = defaultNot.createIs()
         is(['number', 'string'], {}).should.be.false
     })
 })
@@ -516,6 +576,15 @@ describe('checkObject', () => {
                 }
             },
             optional: { array: [] }
+        }).should.be.false
+    })
+//
+    it('should return false when objects (overloaded with optionals using "__optional", "?" and "optional") match', () => {
+        Not.checkObject('optionals', {
+            "string__optional?": ['string', 'object', 'optional'],
+            null: 'null'
+        }, {
+            null: null
         }).should.be.false
     })
 
@@ -769,4 +838,13 @@ describe('defineType', () => {
     })
 
 
+})
+
+describe('_are', () => {
+    it('should return true when matched', () => {
+        Not._are('array', []).should.be.true
+    })
+    it('should return false when not matched', () => {
+        Not._are('object', []).should.be.false
+    })
 })

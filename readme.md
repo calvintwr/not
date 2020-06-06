@@ -18,7 +18,18 @@
 const Not = require('you-are-not')
 let not   = Not.create()
 let str   = 'string'
-not('number', str) // throws error "Wrong Type: Expecting `number` but got `string`."
+
+function test(str) {
+    not('number', str) // throws error "Wrong Type: Expecting `number` but got `string`."
+    // continue with your code
+}
+
+let notDontThrowError = Not.create({ willThrowError: false})
+
+function test2(str) {
+    if (not('number', str)) return false // short circuit your code elegantly at the top.
+    // continue with your code
+}
 
 //or check objects
 let anotherNot = Object.create(Not)
@@ -32,8 +43,14 @@ let errors = anotherNot.checkObject(
     candidateToCheck
 )
 // throws error, errors are organised neatly into an array.
-```
 
+/* *Not* Also Has `#is` */
+
+let is = Not.createIs()
+is('array', []) // returns true
+is('number', NaN) // returns false
+```
+Because `#is` needs to return true when the check passes, it is not as powerful as `#not`.
 ## Why *Not*?
 
 ### Let's face it, we seldom type-check, because we're missing something.
@@ -151,17 +168,32 @@ someAPIEndPoint((request, response) => {
     let errors = apiNot.checkObject('request', {
         name: 'string',
         subscribe: 'boolean',
-        "info?": { // not that for objects that are optional, use "__optional" or suffix "?".
+        "info?": {
             gender: 'string',
-            age: ['string', 'optional'] // it can be optional, or if present, it must be string.
+            "age?": 'number'
         }
     }, request.body, callback)
     // provide `callback` if you wish to handle the error yourself.
 
     if (errors) return response.status(500).send({ error })
     response.status(200).send('Success!')
-
 })
+
+// you can use optional notations like this:
+"info?": {
+    gender: 'string',
+    "age?": 'number'
+}
+//is same as
+info__optional: {
+    gender: 'string',
+    age__optional: 'number'
+}
+//is same as
+info__optional: {
+    gender: 'string',
+    age: ['number', 'optional']
+}
 ```
 *Not* can sanitise your payload:
 ```js
@@ -215,24 +247,19 @@ apiNot.resolve(errors => {
 Primitives:
 'string'
 'number'
-'nan' // this is an opinion. NaN should not be of type number in the literal sense.
 'array'
 'object'
 'function'
 'boolean'
 'null'
 'undefined'
+'symbol'
+'nan' // this is an opinion. NaN should not be of type number in the literal sense.
 
 Aggregated:
 'optional' // which means 'null' and 'undefined'
 ```
-### *Not* Also Has `#is`
-```js
-let is = Not.createIs()
-is('array', []) // returns true
-is('number', NaN) // returns false
-```
-Because `#is` needs to return true when the check passes, it is not as powerful as `#not`.
+
 ### Example - Checking Multiple Types
 Instead of the horrible:
 ```js
@@ -300,7 +327,7 @@ Those are technically not wrong (or debatable), but often gets in the way.
 1. `NaN` is not a **'number'**, and will be **'nan'**.
 2. `Array` and `[]` are of **'array'** type, and not **'object'**.
 3. `null` is **'null'** and not an **'object'**.
-4. Instance of `#String` is **'string'** and not an **'object'**.
+4. Instance of `new` `#String`, `#Number` or `#Boolean` are their not of type **'object'** but their respective types.
 
 ### Switch Off *Not*'s Opinions
 You can switch off opinionated type-checking:
@@ -317,19 +344,23 @@ not('object', null) // returns false -- `null` is an object
 ```js
 // both #createIs and #create can take in the same options
 let NotWithPartialOpinions = Not.createIs({
-    opinionatedOnNaN:    false
-    opinionatedOnArray:  false
-    opinionatedOnNull:   false
-    opinionatedOnString: false
+    opinionatedOnNaN:     false,
+    opinionatedOnArray:   false,
+    opinionatedOnNull:    false,
+    opinionatedOnString:  false,
+    opinionatedOnNumber:  false,   
+    opinionatedOnBoolean: false
 })
 
 // or mutate the object before instantiating.
 let NotWithPartialOpinions = Object.create(Not)
 Object.assign(NotWithPartialOptions, {
-    opinionatedOnNaN:    false
-    opinionatedOnArray:  false
-    opinionatedOnNull:   false
-    opinionatedOnString: false
+    opinionatedOnNaN:     false,
+    opinionatedOnArray:   false,
+    opinionatedOnNull:    false,
+    opinionatedOnString:  false,
+    opinionatedOnNumber:  false,   
+    opinionatedOnBoolean: false
 })
 let not = NotWithPartialOpinions.create()
 let is  = NotWithPartialOpinions.createIs()

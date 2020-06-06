@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * You-Are-Not v0.5.1
+ * You-Are-Not v0.5.2
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -9,30 +9,35 @@
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 var You = {
-  opinionatedOnNaN: true,
-  opinionatedOnArray: true,
-  opinionatedOnNull: true,
-  opinionatedOnString: true,
-  _isOpinionated: true,
   willThrowError: true
 };
-/* Core properties */
+/* Core properties/methods */
+// opinions
+
+Object.defineProperty(You, '_opinions', {
+  value: ['opinionatedOnNaN', 'opinionatedOnArray', 'opinionatedOnNull', 'opinionatedOnString', 'opinionatedOnNumber', 'opinionatedOnBoolean']
+}); // isOpinionated
 
 Object.defineProperty(You, 'isOpinionated', {
   get: function get() {
     return this._isOpinionated;
   },
   set: function set(value) {
+    var _this = this;
+
     this._isOpinionated = value;
-    this.opinionatedOnNaN = value;
-    this.opinionatedOnArray = value;
-    this.opinionatedOnNull = value;
-    this.opinionatedOnString = value;
-  }
+
+    this._opinions.forEach(function (key) {
+      _this[key] = value;
+    });
+  },
+  enumerable: true
 });
+You.isOpinionated = true; // set opionated mode by default
+// areNot
+
 Object.defineProperty(You, 'areNot', {
   value: function value(expect, got, name, note) {
-    // a prepare function
     expect = this.prepareExpect(expect);
     var gotType = this.type(got);
     if (this.found(expect, got, gotType)) return false;
@@ -40,21 +45,30 @@ Object.defineProperty(You, 'areNot', {
     if (this.willThrowError) throw TypeError(msg);
     return msg;
   }
-});
-Object.defineProperty(You, 'are', {
-  value: function value(expect, got) {
-    try {
-      var chk = this.areNot(expect, got);
-      if (typeof chk === 'string') return false;
-      return true;
-    } catch (error) {
-      return false;
+}); // are and _are (for internal use)
+
+Object.defineProperties(You, {
+  are: {
+    value: function value(expect, got, name, note) {
+      var fail = this.areNot(expect, got);
+      return !fail;
+    }
+  },
+  _are: {
+    value: function value(expect, got, name, note) {
+      try {
+        var fail = this.areNot(expect, got, name, note);
+        if (typeof fail === 'string') return false;
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
   }
-});
-Object.defineProperty(You, 'primitives', {
-  value: ['string', 'number', 'nan', // this is an opinion. NaN should not be of type number in the literal sense.
-  'array', 'object', 'function', 'boolean', 'null', 'undefined' // no support for symbol. should we care?
+}); // primitives
+
+Object.defineProperty(You, '_primitives', {
+  value: ['string', 'number', 'array', 'object', 'function', 'boolean', 'null', 'undefined', 'symbol', 'nan' // this is an opinion. NaN should not be of type number in the literal sense.
   ],
   enumerable: true
 });
@@ -68,8 +82,8 @@ You.not = function (expect, got, name, note) {
   return this.areNot(expect, got, name, note);
 };
 
-You.is = function (expect, got) {
-  return this.are(expect, got);
+You.is = function (expect, got, name, note) {
+  return this.are(expect, got, name, note);
 };
 
 You.found = function (expect, got, gotType) {
@@ -81,7 +95,7 @@ You.found = function (expect, got, gotType) {
 
     if (el.indexOf('$$') > -1) {
       // the customs must pass or fail as a whole, not in part.
-      var passing = this.are(this[el].primitive, got, this.customNameReplace(el));
+      var passing = this._are(this[el].primitive, got, this.customNameReplace(el));
 
       if (!passing) {
         continue; // if it doesn't pass the primitives check, no need to check further
@@ -108,24 +122,27 @@ You.found = function (expect, got, gotType) {
 };
 
 You.prepareExpect = function (expect) {
-  var _this = this;
+  var _this2 = this;
 
   if (typeof expect === 'string') {
     expect = [expect];
   } else if (!Array.isArray(expect)) {
-    throw TypeError("Internal error: Say what you expect to check as a string or array of strings. Found ".concat(this.list(this.type(expect), 'as'), "."));
+    console.log(expect);
+    var x = TypeError("Internal error: Say what you expect to check as a string or array of strings. Found ".concat(this.list(this.type(expect), 'as'), "."));
+    console.log(x.stack);
+    throw x;
   } //return expect
 
 
   return expect.reduce(function (r, expect) {
-    if (typeof expect !== 'string') throw TypeError("Internal error: Say what you expect to check as a string. Found ".concat(_this.list(_this.type(expect), 'as'), "."));
+    if (typeof expect !== 'string') throw TypeError("Internal error: Say what you expect to check as a string. Found ".concat(_this2.list(_this2.type(expect), 'as'), "."));
     expect = expect.toLowerCase();
-    return _this.mapExpect(r, expect);
+    return _this2.mapExpect(r, expect);
   }, []);
 };
 
 You.mapExpect = function (r, expect) {
-  if (this.primitives.indexOf(expect) === -1) {
+  if (this._primitives.indexOf(expect) === -1) {
     if (this["$$custom_".concat(expect)] !== undefined) {
       r.push("$$custom_".concat(expect));
       return r;
@@ -203,24 +220,42 @@ You.type = function (got) {
     }
   }
 
+  if (got instanceof Number) {
+    if (this.opinionatedOnNumber) {
+      if (isNaN(got.valueOf())) return 'nan';
+      return 'number';
+    } else {
+      if (isNaN(got.valueOf())) return ['number', 'nan', 'object'];
+      return ['number', 'object'];
+    }
+  }
+
+  if (got instanceof Boolean) {
+    if (this.opinionatedOnBoolean) {
+      return 'boolean';
+    } else {
+      return ['boolean', 'object'];
+    }
+  }
+
   return 'object';
 };
 
 You.lodge = function (expect, got, name, note) {
-  // when using ingest you want to mute throwing errors.
-  this._oldValue_willThrowError = this.willThrowError;
-  this.willThrowError = false;
   if (!this._lodged) this._lodged = [];
-  var ingestation = this.areNot(expect, got, name, note);
-  if (ingestation) this._lodged.push(ingestation); // revert
+  var lodge = false; // don't let lodge error
 
-  this.willThrowError = this._oldValue_willThrowError;
-  this._oldValue_willThrowError = null;
-  return ingestation;
+  try {
+    lodge = this.areNot(expect, got, name, note);
+  } catch (error) {
+    lodge = error.message;
+  }
+
+  if (lodge) this._lodged.push(lodge);
+  return lodge;
 };
 
 You.resolve = function (callback, returnedPayload) {
-  //console.log(this._lodged)
   if (this._lodged === undefined || this._lodged.length === 0) {
     return typeof callback === 'function' ? callback(false, returnedPayload) : false;
   }
@@ -277,18 +312,25 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
   if (returnPayload) var sanitisedPayload = {};
 
   for (var i = 0, keys = Object.keys(expectObject); i < keys.length; i++) {
+    var _optionalReplace = function _optionalReplace(suffix) {
+      return function (key) {
+        return key.substring(0, key.length - suffix.length);
+      };
+    };
+
+    var _suffixCheck = function _suffixCheck(str, suffix) {
+      return str.indexOf(suffix) > -1 && str.indexOf(suffix) === str.length - suffix.length;
+    };
+
     var key = keys[i];
     var expect = expectObject[key];
     var optional = false;
+    var optionalString = '__optional';
 
-    if (key.indexOf('__optional') > -1) {
-      optional = function replace(key) {
-        return key.replace('__optional', '');
-      };
-    } else if (key.indexOf('?') === key.length - 1) {
-      optional = function replace(key) {
-        return key.substring(0, key.length - 1);
-      };
+    if (_suffixCheck(key, '?')) {
+      optional = _optionalReplace('?');
+    } else if (_suffixCheck(key, optionalString)) {
+      optional = _optionalReplace(optionalString);
     }
 
     var keyCopy = optional ? optional(key) : key;
@@ -313,7 +355,14 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
       continue;
     }
 
-    if (optional) expect = Array.isArray(expect) ? expect.push('optional') : [expect, 'optional'];
+    if (optional) {
+      if (Array.isArray(expect)) {
+        expect.push('optional');
+      } else {
+        expect = [expect, 'optional'];
+      }
+    }
+
     var fail = this.lodge(expect, got, "".concat(name, ".").concat(keyCopy));
     if (returnPayload && !fail && got) sanitisedPayload[keyCopy] = got;
   }
@@ -322,7 +371,7 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
 };
 
 You.defineType = function (payload) {
-  var _this2 = this;
+  var _this3 = this;
 
   var sanitised = this.__proto__.checkObject('defineType', {
     primitive: ['string', 'array'],
@@ -341,17 +390,13 @@ You.defineType = function (payload) {
 
   if (typeof sanitised.primitive === 'string') sanitised.primitive = [sanitised.primitive];
   sanitised.primitive.forEach(function (p) {
-    if (_this2.primitives.indexOf(p) === -1) throw TypeError("Internal error: `".concat(p, "` is not a valid primitive."));
+    if (_this3._primitives.indexOf(p) === -1) throw TypeError("Internal error: `".concat(p, "` is not a valid primitive."));
   });
   var key = "$$custom_".concat(sanitised.type);
   this[key] = {
     primitive: sanitised.primitive
   };
   if (sanitised.pass) this[key]['pass'] = sanitised.pass;
-};
-
-You.$$custom_optional = {
-  primitive: ['null', 'undefined']
 };
 
 You.create = function (options) {
@@ -375,17 +420,27 @@ You.createIs = function (options) {
 };
 
 You._applyOptions = function (instance, options) {
-  //using #are because it's not writable and configurable
-  if (this.are('object', options)) {
-    if (this.are('boolean', options.opinionatedOnNaN)) instance.opinionatedOnNaN = options.opinionatedOnNaN;
-    if (this.are('boolean', options.opinionatedOnArray)) instance.opinionatedOnArray = options.opinionatedOnArray;
-    if (this.are('boolean', options.opinionatedOnNull)) instance.opinionatedOnNull = options.opinionatedOnNull;
-    if (this.are('boolean', options.opinionatedOnString)) instance.opinionatedOnString = options.opinionatedOnString;
-    if (this.are('boolean', options.isOpinionated)) instance.isOpinionated = options.isOpinionated;
-    if (this.are('boolean', options.willThrowError)) instance.willThrowError = options.willThrowError;
-  }
-};
+  var _this4 = this;
 
+  //using #_are because it's not writable and configurable
+  if (this._are('object', options)) {
+    if (this._are('boolean', options.willThrowError)) instance.willThrowError = options.willThrowError;
+
+    if (this._are('boolean', options.isOpinionated)) {
+      instance.isOpinionated = options.isOpinionated;
+      return;
+    }
+
+    this._opinions.forEach(function (optionKey) {
+      if (_this4._are('boolean', options[optionKey])) instance[optionKey] = options[optionKey];
+    });
+  }
+}; //Aggregators, or default non-primitive checks
+
+
+You.$$custom_optional = {
+  primitive: ['null', 'undefined']
+};
 module.exports = Object.create(You);
 exports = module.exports;
 
