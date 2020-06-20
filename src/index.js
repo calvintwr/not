@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.5.3
+ * You-Are-Not v0.6.0
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -137,9 +137,7 @@ You.prepareExpect = function(expect) {
     if (typeof expect === 'string') {
         expect = [expect]
     } else if (!Array.isArray(expect)) {
-        console.log(expect)
         let x =  TypeError(`Internal error: Say what you expect to check as a string or array of strings. Found ${this.list(this.type(expect), 'as')}.`)
-        console.log(x.stack)
         throw x
     }
     //return expect
@@ -246,6 +244,7 @@ You.type = function(got) {
 }
 
 You.lodge = function(expect, got, name, note) {
+    if (this === You) throw Error('You cannot use #lodge on the Not prototype directly. Use Object.create(Not).')
     if (!this._lodged) this._lodged = []
     let lodge = false
 
@@ -261,6 +260,7 @@ You.lodge = function(expect, got, name, note) {
 
 You.resolve = function(callback, returnedPayload) {
     if (this._lodged === undefined || this._lodged.length === 0) {
+        console.log(this._lodged)
         return (typeof callback === 'function') ? callback(false, returnedPayload) : false
     }
     if (typeof callback === 'function') return callback(this._lodged, returnedPayload)
@@ -283,14 +283,20 @@ You.checkObject = function (name, expectObject, gotObject, callback) {
 
     if (typeof callback === 'function') {
         not.walkObject(name, expectObject, gotObject)
-        return not.resolve(callback)
+        return not.resolve(callback, null) // null to specify no payload
     }
     if (typeof callback === 'object') {
         let returnedPayload = null
+
+        // walk payload
         if (callback.returnPayload === true) {
             returnedPayload = not.walkObject(name, expectObject, gotObject, true)
-            if (returnedPayload === '$$empty$$') returnedPayload = {}
+            if (returnedPayload === '$$empty$$') returnedPayload = null
+        } else {
+            not.walkObject(name, expectObject, gotObject)
         }
+
+        // set callback
         if (typeof callback.callback === 'function') {
             callback = callback.callback
         } else {
@@ -299,6 +305,7 @@ You.checkObject = function (name, expectObject, gotObject, callback) {
                 return payload
             }
         }
+
         return not.resolve(callback, returnedPayload)
     }
     not.walkObject(name, expectObject, gotObject)
@@ -417,5 +424,9 @@ You.$$custom_optional = {
     primitive: ['null', 'undefined']
 }
 
-module.exports = Object.create(You)
-exports = module.exports
+let NotWontThrow = Object.create(You)
+NotWontThrow.willThrowError = false
+You.NotWontThrow = NotWontThrow
+
+exports = module.exports = You
+//exports.Not = You

@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * You-Are-Not v0.5.3
+ * You-Are-Not v0.6.0
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -127,9 +127,7 @@ You.prepareExpect = function (expect) {
   if (typeof expect === 'string') {
     expect = [expect];
   } else if (!Array.isArray(expect)) {
-    console.log(expect);
     var x = TypeError("Internal error: Say what you expect to check as a string or array of strings. Found ".concat(this.list(this.type(expect), 'as'), "."));
-    console.log(x.stack);
     throw x;
   } //return expect
 
@@ -242,6 +240,7 @@ You.type = function (got) {
 };
 
 You.lodge = function (expect, got, name, note) {
+  if (this === You) throw Error('You cannot use #lodge on the Not prototype directly. Use Object.create(Not).');
   if (!this._lodged) this._lodged = [];
   var lodge = false; // don't let lodge error
 
@@ -257,6 +256,7 @@ You.lodge = function (expect, got, name, note) {
 
 You.resolve = function (callback, returnedPayload) {
   if (this._lodged === undefined || this._lodged.length === 0) {
+    console.log(this._lodged);
     return typeof callback === 'function' ? callback(false, returnedPayload) : false;
   }
 
@@ -281,16 +281,19 @@ You.checkObject = function (name, expectObject, gotObject, callback) {
 
   if (typeof callback === 'function') {
     not.walkObject(name, expectObject, gotObject);
-    return not.resolve(callback);
+    return not.resolve(callback, null); // null to specify no payload
   }
 
   if (_typeof(callback) === 'object') {
-    var returnedPayload = null;
+    var returnedPayload = null; // walk payload
 
     if (callback.returnPayload === true) {
       returnedPayload = not.walkObject(name, expectObject, gotObject, true);
-      if (returnedPayload === '$$empty$$') returnedPayload = {};
-    }
+      if (returnedPayload === '$$empty$$') returnedPayload = null;
+    } else {
+      not.walkObject(name, expectObject, gotObject);
+    } // set callback
+
 
     if (typeof callback.callback === 'function') {
       callback = callback.callback;
@@ -441,8 +444,10 @@ You._applyOptions = function (descendant, options) {
 You.$$custom_optional = {
   primitive: ['null', 'undefined']
 };
-module.exports = Object.create(You);
-exports = module.exports;
+var NotWontThrow = Object.create(You);
+NotWontThrow.willThrowError = false;
+You.NotWontThrow = NotWontThrow;
+exports = module.exports = You; //exports.Not = You
 
 },{}]},{},[1])(1)
 });

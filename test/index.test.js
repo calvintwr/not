@@ -1,7 +1,13 @@
 'use strict'
 
 const Not = require('../index.js')
+// ES6
+//import Not from '../index.js'
 Not.willThrowError = false
+
+// ES6 Shorthand
+//import { NotWontThrow as Not } from '../index.js'
+
 const should = require('chai').should()
 
 describe('checking', () => {
@@ -416,11 +422,18 @@ describe('createIs', () => {
 })
 
 describe('lodge', () => {
-    const you = Object.create(Not)
-    you.lodge('string', new String())
-    you.lodge('array', {})
+
+    it('should throw error if attempting to use Not prototype directly', () => {
+        (() => {
+            Not.lodge('string', new String())
+        }).should.Throw(Error, 'You cannot use #lodge on the Not prototype directly. Use Object.create(Not).')
+    })
 
     it('should have _lodged array of length 1', () => {
+        const you = Object.create(Not)
+        you.lodge('string', new String())
+        you.lodge('array', {})
+
         you._lodged.should.be.an('array')
         you._lodged.length.should.equal(1)
     })
@@ -479,12 +492,19 @@ describe('prepareExpect', () => {
             '$$custom_optional'
         ])
     })
+
+    it('should throw error when not given string or array', () => {
+        (() => {
+            Not.prepareExpect(1)
+        }).should.Throw(TypeError, 'Internal error: Say what you expect to check as a string or array of strings. Found `number`.')
+    })
 })
 
 describe('checkObject', () => {
 
     it('should return false when objects (no optionals) match', () => {
-        Not.checkObject('noOptionals', {
+        let n = Object.create(Not)
+        n.checkObject('noOptionals', {
             string: 'string',
             null: 'null',
             object: {
@@ -506,7 +526,8 @@ describe('checkObject', () => {
     })
 
     it('should return false when objects (with optionals) match', () => {
-        Not.checkObject('optionals', {
+        let n = Object.create(Not)
+        n.checkObject('optionals', {
             string: 'string',
             null: 'null',
             object: {
@@ -530,7 +551,8 @@ describe('checkObject', () => {
     })
 
     it('should return false when objects (with optionals using "?") match', () => {
-        Not.checkObject('optionals', {
+        let n = Object.create(Not)
+        n.checkObject('optionals', {
             string: 'string',
             null: 'null',
             object: {
@@ -554,7 +576,8 @@ describe('checkObject', () => {
     })
 
     it('should return false when objects (with optionals using "?") match', () => {
-        Not.checkObject('optionals', {
+        let n = Object.create(Not)
+        n.checkObject('optionals', {
             string: 'string',
             null: 'null',
             object: {
@@ -578,9 +601,10 @@ describe('checkObject', () => {
             optional: { array: [] }
         }).should.be.false
     })
-//
+
     it('should return false when objects (overloaded with optionals using "__optional", "?" and "optional") match', () => {
-        Not.checkObject('optionals', {
+        let n = Object.create(Not)
+        n.checkObject('optionals', {
             "string__optional?": ['string', 'object', 'optional'],
             null: 'null'
         }, {
@@ -589,7 +613,8 @@ describe('checkObject', () => {
     })
 
     it('should return error array when objects (with optionals) do not match', () => {
-        let errors = Not.checkObject('optionalsNoMatch', {
+        let n = Object.create(Not)
+        let errors = n.checkObject('optionalsNoMatch', {
             string: 'string',
             null: 'null',
             object: {
@@ -627,7 +652,8 @@ describe('checkObject', () => {
     })
 
     it('should return error array when optional object do not match', () => {
-        let errors = Not.checkObject('optionalsMatch', {
+        let n = Object.create(Not)
+        let errors = n.checkObject('optionalsMatch', {
             optional__optional: { array: 'array' }
         }, {
             optional: { array: null }
@@ -641,7 +667,8 @@ describe('checkObject', () => {
     })
 
     it('should return error array when optional object do not match', () => {
-        let errors = Not.checkObject('optionalsMatch', {
+        let n = Object.create(Not)
+        let errors = n.checkObject('optionalsMatch', {
             optional__optional: { array: 'array' }
         }, {
             optional: { array: null }
@@ -654,8 +681,50 @@ describe('checkObject', () => {
         ])
     })
 
+    it('should return error (willThrowError = false) in callback', () => {
+        let n = Object.create(Not)
+        let errors = n.checkObject('optionalsMatch', {
+            optional__optional: { array: 'array' }
+        }, {
+            optional: { array: null }
+        }, function(errors, payload) {
+            errors.should.be.an('array')
+            errors.length.should.equal(1)
+            errors.should.include.members([
+                'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `null`.',
+            ])
+            should.equal(payload, null)
+        })
+    })
+    it('should return error (willThrowError = false) in callback (specified as options)', () => {
+        let n = Object.create(Not)
+        let schema = {
+            optional__optional: { array: 'array' }
+        }
+        let candidate =  {
+            optional: { array: null }
+        }
+        let callback = function(errors, payload) {
+            errors.should.be.an('array')
+            errors.length.should.equal(1)
+            errors.should.include.members([
+                'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `null`.',
+            ])
+            should.equal(payload, null)
+        }
+
+        let errors = n.checkObject(
+            'optionalsMatch',
+            schema,
+            candidate,
+            {
+                callback:  callback
+            }
+        )
+    })
+
     it('should return error array when optional object do not match, even if returnPayload is true', () => {
-        let not = Object.create(Not)
+        let n = Object.create(Not)
         let schema = {
             optional__optional: { array: 'array' }
         }
@@ -664,7 +733,7 @@ describe('checkObject', () => {
             optional: { array: 123 }
         }
 
-        let errors = not.checkObject(
+        let errors = n.checkObject(
             'optionalsMatch',
             schema,
             payload,
@@ -679,7 +748,7 @@ describe('checkObject', () => {
     })
 
     it('should return and sanitise payload (returnPayload = true) when objects match - deep nesting', () => {
-        let not = Object.create(Not)
+        let n = Object.create(Not)
         let testFn = function() {}
         let schema = {
             optional__optional: { array: 'array'},
@@ -692,7 +761,7 @@ describe('checkObject', () => {
             toBeSanitised: 'test'
         }
 
-        let sanitised = not.checkObject(
+        let sanitised = n.checkObject(
             'optionalsMatch',
             schema,
             payload,
@@ -703,7 +772,7 @@ describe('checkObject', () => {
     })
 
     it('should return and sanitise payload (returnPayload = true) and drop branches when there are no valid values', () => {
-        let not = Object.create(Not)
+        let n = Object.create(Not)
         let schema = {
             optionalSanitise__optional: { array: ['array', 'optional'] }
         }
@@ -712,18 +781,17 @@ describe('checkObject', () => {
             optionalSanitise: { noMatch: '1', noMatch2: 2 },
         }
 
-        let sanitised = not.checkObject(
+        let sanitised = n.checkObject(
             'optionalsMatch',
             schema,
             payload,
             { returnPayload: true }
         )
-        sanitised.should.be.an('object')
-        sanitised.should.deep.equal({})
+        should.equal(sanitised, null)
     })
 
     it('should return false when there are no valid values', () => {
-        let not = Object.create(Not)
+        let n = Object.create(Not)
         let schema = {
             optionalSanitise__optional: { array: ['array', 'optional'] },
             compulsorySanitise: { array: ['array', 'optional'] }
@@ -738,7 +806,7 @@ describe('checkObject', () => {
             }}
         }
 
-        not.checkObject(
+        n.checkObject(
             'optionalsMatch',
             schema,
             payload

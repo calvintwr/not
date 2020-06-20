@@ -15,53 +15,59 @@
 ### Double Negative Mechanism #not
 *Not* uses a double negative mechanism (it is more powerful and will be explain further below). Simplest usage looks like this:
 ```js
+// `require` syntax
 const Not = require('you-are-not')
-let not   = Not.create()
+// or `import` syntax
+import Not from 'you-are-not'
+let not = Not.create()
+let notDontThrow = Not.create({ willThrowError: false }) // if you don't want Not to throw error.
 
-function test(str) {
-    not('number', str) // throws error "Wrong Type: Expecting `number` but got `string`."
+function test(string, number, object) {
+    not('string', string) // throws error if not string
+    not('number', number) // throws error if not number
+
+    let notObject = notDontThrow('object', object)  // returns string with error message
+    object = notObject ? {} : object
+
     // continue with your code
 }
 
-let notDontThrowError = Not.create({ willThrowError: false })
-function test2(str) {
-    if (notDontThrowError('number', str)) return false // short circuit your code elegantly at the top.
-    // continue with your code
-}
+/* Check Objects */
+// if you don't want to throw errors, use NotWontThrow
+// `require` syntax
+const Not = require('you-are-not').NotWontThrow
+// `import` syntax
+import { NotWontThrow as Not } from 'you-are-not'
 
-//or check objects
-let anotherNot = Object.create(Not)
-let schema    = { string: 'string', number: 'number' } // a schema that replicates intuitively your object structure
-let candidate = { string: 123,      number: '123' // wrong typing here } 
-let errors = anotherNot.checkObject(
-    'objectName',
+// a schema that replicates intuitively your object structure
+let schema    = { string: 'string',       number: 'number'     }
+let candidate = { string: 'correct type', number: 'wrong type' }
+let errors = Not.checkObject(
+    'objectName', // specify a name for object
     schema,
     candidate
 )
-// will throws error, errors are organised neatly into an array.
+
 
 /* *Not* Also Has `#is` */
-
 let is = Not.createIs()
 is('array', []) // returns true
 is('number', NaN) // returns false
 ```
+*Note: #is does not throw by default.
 Because `#is` needs to return true when the check passes, it is not as powerful as `#not`.
+
 ## Why *Not*?
 
 ### Let's face it, we seldom type-check, because we're missing something.
 
 *Not* is **that** small and convenient type-checking validation library you have been missing to do just that. It also overcomes JS quirks that gets in the way, like: `typeof null // 'object'`.
 
-### If you use Typescript, it is not the full solution. *Not* fills in the gap.
-Typescript doesn't check at runtime, you need to complete it with *Not*. Written in full JS and assailed with tests, it doesn't add to your compilation time.
-
-### Restore Javascript Flexibility, Solidify Your Client-Facing APIs.
+### Typescript doesn't check at runtime, it is not the full solution. *Not* fills in the gap.
 Unlock flexibility of Javascript, where typing need not be strict, and functions/APIs (especially client-facing ones) are made powerful by being able to accept different argument types, or error *gracefully*.
 
 ### Meet Deadlines With Accurate Code
-Write good code quickly; find the **balance** in code accuracy and writing speed. Leverage flexibility that Javascript has intended for.
-
+Write good code quickly; find the **balance** in code accuracy and writing speed.
 
 ## Installation
 
@@ -76,7 +82,7 @@ if (not('string', 'i am string')) // do something
 // Nope, let's move on.
 ```
 
-When *Not* fails, it throws an error by default. Or, you can cleverly return a `string` **which can be used to evaluate to `true` to perform some operations!**
+When *Not* fails, **it throws an error by default**. Or, you can cleverly return a `string` **which can be used to evaluate to `true` to perform some operations!**
 ```js
 const not = Not.create({ willThrowError: false })
 // instead of throwing, `not` will return string
@@ -96,6 +102,9 @@ input.toLowerCase()
 ### Standard Example
 ```js
 const Not = require('you-are-not')
+// OR const Not = require('you-are-not')
+// OR import Not from 'you-are-not'
+// OR import { NotWontThrow as Not } from 'you-are-not'
 
 function test(foo, bar) {
     let not = Not.create()
@@ -124,57 +133,88 @@ function test(foo, bar) {
     // if not must be a number.
 }
 
-let fooNotString = ['foo']
-test(fooNotString)
-// will throw: ! Wrong Type (FOO): Expect type `string` but got `array`. [MESSAGE or TIMESTAMP].
+test(['foo'])
+// will throw or return string: Wrong Type (FOO): Expect type `string` but got `array`. [MESSAGE or TIMESTAMP].
 ```
 
 ### Need Heavy Lifting? Bulk Check Objects
 #### Using `#checkObject`
 In the real world, the our API params checking is a ~~leaning~~ tower of code. *Not* makes it neat and produces super user-friendly error messages. *No one loses hair*:
 ```js
-const Not = require('you-are-not')
+import { NotWontThrow as Not } from 'you-are-not'
+
+// Usage 1:  Simple mode
 someAPIEndPoint((request, response) => {
 
-	/* checking starts */
-    let apiNot = Object.create(Not) // use the full object, don't call #create.
-    apiNot.willThrowError = false
-
-    /* Usage
-    #checkObject(
-        name of object,
-        expectations <object>,
-        what you got <object>,
-        callback <function> [optional]
-    )
-
-    or
+    /* Simple
 
     #checkObject(
-        name of object,
+        name of object <string>,
         expectations <object>,
         what you got <object>,
-        {
-            callback <function> [optional],
-            returnPayload <boolean> [optional]
-        }
+        callback <function (errors)> [optional] - If provided, #Not will not throw errors, but hand them to your callback.
     )
+
+    Returns: Boolean <false> | Array
+
     */
 
-    let errors = apiNot.checkObject('request', {
+    let errors = Not.checkObject('request', {
         name: 'string',
         subscribe: 'boolean',
         "info?": {
             gender: 'string',
             "age?": 'number'
         }
-    }, request.body, callback)
-    // provide `callback` if you wish to handle the error yourself.
+    }, request.body)
 
+    // errors returns false when check passes
+    // returns an array if failed
     if (errors) return response.status(500).send({ error })
     response.status(200).send('Success!')
 })
 
+// Usage 2: Return payload
+
+    someAPIEndPoint((request, response) => {
+
+        /*
+
+        #checkObject(
+            name of object,
+            expectations <object>,
+            what you got <object>,
+            {
+                callback <function (errors, payload)> [optional] - Payload will will be provided if `returnPayload` is true.
+                returnPayload <Boolean> [optional]
+            }
+        )
+
+        */
+
+        Not.checkObject('request', {
+            name: 'string',
+            subscribe: 'boolean',
+            "info?": {
+                gender: 'string',
+                "age?": 'number'
+            }
+        }, request.body, {
+            // switch to `false` for performance when you don't need the payload returned
+            returnPayload: true,
+            callback: function(errors, payload) {
+
+                // errors returns false when check passes
+                // returns an array if failed
+                if (errors) return response.status(500).send({ error })
+                response.status(200).send(payload)
+
+            }
+        })
+    })
+```
+Optional notation:
+```js
 // you can use optional notations like this:
 "info?": {
     gender: 'string',
@@ -191,7 +231,9 @@ info__optional: {
     age: ['number', 'optional']
 }
 ```
+
 *Not* can sanitise your payload:
+
 ```js
 let schema = {
     valid: 'string',
@@ -206,23 +248,27 @@ let payload = {
         omitThis: 123
     }
 }
-let sanitised = apiNot.checkObject(
+let sanitised = Not.checkObject(
     'request',
     schema,
     payload, {
-        callback: function(errors, payload) { ... },
         returnPayload: true
     }
 })
 
-// if is array, means something failed.
-if(Array.isArray(sanitised)) throw sanitised
-
-doSomethingWithYourPayload(sanitised)
-
+// if `sanitised` is an array, means something failed.
+if(Array.isArray(sanitised)) {
+    throw sanitised
+} else {
+    doSomethingWithYourPayload(sanitised)
+}
 ```
+
 You can also use `#lodge` And `#resolve` to bulk checking with more control:
+
 ```js
+// create a descendant
+let apiNot = Object.create(Not)
 
 apiNot.lodge('string', request.name, 'name')
 apiNot.lodge('boolean', request.subscribe, 'subscribe')
@@ -285,11 +331,19 @@ not.defineType({
     type: 'integer', // name your test
     pass: function(candidate) {
         return candidate.toFixed(0) === candidate.toString()
+        // or ES6:
+        // return Number.isInteger(candidate)
     }
 })
 not.not('integer', 4.4) // gives error message
 not.is('integer', 4.4) // returns false
 
+```
+
+Having trouble with empty `[]` or `{}` that sometimes is `false` or `null` or `undefined`?
+
+Define a "falsey" type like this:
+```js
 not.defineType({
     primitive: ['null', 'undefined', 'boolean', 'object', 'nan', 'array' ],
     type: 'falsey',
