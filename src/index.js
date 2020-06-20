@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.6.0
+ * You-Are-Not v0.6.1
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -244,7 +244,6 @@ You.type = function(got) {
 }
 
 You.lodge = function(expect, got, name, note) {
-    if (this === You) throw Error('You cannot use #lodge on the Not prototype directly. Use Object.create(Not).')
     if (!this._lodged) this._lodged = []
     let lodge = false
 
@@ -260,16 +259,17 @@ You.lodge = function(expect, got, name, note) {
 
 You.resolve = function(callback, returnedPayload) {
     if (this._lodged === undefined || this._lodged.length === 0) {
-        console.log(this._lodged)
         return (typeof callback === 'function') ? callback(false, returnedPayload) : false
     }
-    if (typeof callback === 'function') return callback(this._lodged, returnedPayload)
+    let lodged = this._lodged.slice()
+    this._lodged = undefined
+    if (typeof callback === 'function') return callback(lodged, returnedPayload)
     if (this.willThrowError) {
         let errors = TypeError('Wrong types provided. See `trace`.')
-        errors.trace = this._lodged
+        errors.trace = lodged
         throw errors
     }
-    return this._lodged
+    return lodged
 }
 
 You.checkObject = function (name, expectObject, gotObject, callback) {
@@ -368,7 +368,8 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
 }
 
 You.defineType = function(payload) {
-    let sanitised = Object.getPrototypeOf(this).checkObject('defineType', {
+    let prototype = this === You ? this : Object.getPrototypeOf(this)
+    let sanitised = prototype.checkObject('defineType', {
         primitive: ['string', 'array'],
         type: 'string',
         pass: ['function', 'optional']
@@ -429,4 +430,3 @@ NotWontThrow.willThrowError = false
 You.NotWontThrow = NotWontThrow
 
 exports = module.exports = You
-//exports.Not = You

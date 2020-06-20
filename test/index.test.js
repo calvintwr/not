@@ -423,12 +423,6 @@ describe('createIs', () => {
 
 describe('lodge', () => {
 
-    it('should throw error if attempting to use Not prototype directly', () => {
-        (() => {
-            Not.lodge('string', new String())
-        }).should.Throw(Error, 'You cannot use #lodge on the Not prototype directly. Use Object.create(Not).')
-    })
-
     it('should have _lodged array of length 1', () => {
         const you = Object.create(Not)
         you.lodge('string', new String())
