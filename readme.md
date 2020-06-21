@@ -15,11 +15,29 @@
 ### Double Negative Mechanism #not
 *Not* uses a double negative mechanism (it is more powerful and will be explain further below). Simplest usage looks like this:
 ```js
-// `require` syntax
 const Not = require('you-are-not')
-// or `import` syntax
-import Not from 'you-are-not'
-let not = Not.create()
+const not = Not.create()
+
+let testString    = 'string'
+let testNotString = 123
+not('string', testString) // will return false
+not('string', testNotString) // will throw error
+```
+
+## Installation
+
+```
+npm i --save you-are-not
+```
+
+### More on usage
+
+#### Default
+```js
+const Not = require('you-are-not') // `require` syntax
+import Not from 'you-are-not'      // or `import` syntax
+
+let not          = Not.create()
 let notDontThrow = Not.create({ willThrowError: false }) // if you don't want Not to throw error.
 
 function test(string, number, object) {
@@ -27,32 +45,45 @@ function test(string, number, object) {
     not('number', number) // throws error if not number
 
     let notObject = notDontThrow('object', object)  // returns string with error message
-    object = notObject ? {} : object
+    object = notObject ? {} : object // very common way of setting an empty object for code downstream
 
     // continue with your code
 }
+```
 
-/* Check Objects */
-// if you don't want to throw errors, use NotWontThrow
-// `require` syntax
-const Not = require('you-are-not').NotWontThrow
-// `import` syntax
-import { NotWontThrow as Not } from 'you-are-not'
+#### Don't throw errors
+
+Not throws errors by default. If you want to handle errors yourself:
+```js
+const Not = require('you-are-not').notWontThrow   // `require` syntax
+import { NotWontThrow as Not } from 'you-are-not' // or `import` syntax
+```
+
+#### Check Objects
+```js
+// for this use-case, usually we don't need to throw errors
+const Not = require('you-are-not').NotWontThrow   // `require` syntax
+import { NotWontThrow as Not } from 'you-are-not' // `import` syntax
 
 // a schema that replicates intuitively your object structure
 let schema    = { string: 'string',       number: 'number'     }
+
+// `candidate` is the object you want to test
 let candidate = { string: 'correct type', number: 'wrong type' }
+
+// compare `candidate` with our `schema`
 let errors = Not.checkObject(
     'objectName', // specify a name for object
     schema,
     candidate
 )
+console.log(errors) // if check passes, errors will be false, else it will be an array of errors.
+```
 
-
-/* *Not* Also Has `#is` */
+#### *Not* Also Has `#is`
 let is = Not.createIs()
 is('array', []) // returns true
-is('number', NaN) // returns false
+is('number', NaN) // throws error
 ```
 *Note: #is does not throw by default.
 Because `#is` needs to return true when the check passes, it is not as powerful as `#not`.
@@ -69,11 +100,6 @@ Unlock flexibility of Javascript, where typing need not be strict, and functions
 ### Meet Deadlines With Accurate Code
 Write good code quickly; find the **balance** in code accuracy and writing speed.
 
-## Installation
-
-```
-npm i --save you-are-not
-```
 
 ## Double Negative Mechanism Explained
 *Not* prefers a more powerful "double negative" mechanism, to definitively return `false` when the check passes. It follows the sensible human logic -- "Let's check if something is wrong (not what I want), so that I will do something. Nope, lets move on":
@@ -284,7 +310,7 @@ apiNot.resolve(errors => {
 })
 ```
 
-#### The valid types you can check for are:
+### The valid types you can check for are:
 ```js
 Primitives:
 'string'
@@ -323,10 +349,10 @@ is(['string', 'number', 'array'], foo)
 ```
 
 ### Define your own checks
-```js
-let not = Object.create(Not)
 
-not.defineType({
+#### Simple example
+```js
+Not.defineType({
     primitive: 'number', // you must define your primitives
     type: 'integer', // name your test
     pass: function(candidate) {
@@ -335,33 +361,35 @@ not.defineType({
         // return Number.isInteger(candidate)
     }
 })
-not.not('integer', 4.4) // gives error message
-not.is('integer', 4.4) // returns false
+Not.not('integer', 4.4) // gives error message
+Not.is('integer', 4.4) // returns false
 
 ```
+#### Advanced example
 
 Having trouble with empty `[]` or `{}` that sometimes is `false` or `null` or `undefined`?
-
 Define a "falsey" type like this:
+
 ```js
-not.defineType({
+let is = Not.createIs({ willThrowError: false })
+Not.defineType({
     primitive: ['null', 'undefined', 'boolean', 'object', 'nan', 'array' ],
     type: 'falsey',
     pass: function(candidate) {
-        if (not.is('object', candidate)) return Object.keys(candidate).length === 0
-        if (not.is('array', candidate)) return candidate.length === 0
-        if (not.is('boolean', candidate)) return candidate === false
+        if (is('object', candidate)) return Object.keys(candidate).length === 0
+        if (is('array', candidate)) return candidate.length === 0
+        if (is('boolean', candidate)) return candidate === false
         // its the other primitives null, undefined and nan
         // which is to be passed as falsey straight away without checking
         return true
     }
 })
 
-not.not('falsey', {}) // returns false
-not.not('falsey', [null]) // returns error message
-not.is('falsey', []) // returns true
-not.is('falsey', undefined) // returns true
-not.is(['falsey', 'function'], function() {}) // returns true
+Not.not('falsey', {}) // returns false
+Not.not('falsey', [null]) // returns error message
+Not.is('falsey', []) // returns true
+Not.is('falsey', undefined) // returns true
+Not.is(['falsey', 'function'], function() {}) // returns true
 ```
 
 ## Options - *Not*'s Type-Checking Logic ("Opinions")
