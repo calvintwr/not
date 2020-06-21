@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.6.1
+ * You-Are-Not v0.6.2
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */

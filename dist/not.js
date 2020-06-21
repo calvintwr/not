@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
- * You-Are-Not v0.6.0
+ * You-Are-Not v0.6.2
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -240,7 +240,6 @@ You.type = function (got) {
 };
 
 You.lodge = function (expect, got, name, note) {
-  if (this === You) throw Error('You cannot use #lodge on the Not prototype directly. Use Object.create(Not).');
   if (!this._lodged) this._lodged = [];
   var lodge = false; // don't let lodge error
 
@@ -256,19 +255,21 @@ You.lodge = function (expect, got, name, note) {
 
 You.resolve = function (callback, returnedPayload) {
   if (this._lodged === undefined || this._lodged.length === 0) {
-    console.log(this._lodged);
     return typeof callback === 'function' ? callback(false, returnedPayload) : false;
   }
 
-  if (typeof callback === 'function') return callback(this._lodged, returnedPayload);
+  var lodged = this._lodged.slice();
+
+  this._lodged = undefined;
+  if (typeof callback === 'function') return callback(lodged, returnedPayload);
 
   if (this.willThrowError) {
     var errors = TypeError('Wrong types provided. See `trace`.');
-    errors.trace = this._lodged;
+    errors.trace = lodged;
     throw errors;
   }
 
-  return this._lodged;
+  return lodged;
 };
 
 You.checkObject = function (name, expectObject, gotObject, callback) {
@@ -376,7 +377,8 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
 You.defineType = function (payload) {
   var _this3 = this;
 
-  var sanitised = Object.getPrototypeOf(this).checkObject('defineType', {
+  var prototype = this === You ? this : Object.getPrototypeOf(this);
+  var sanitised = prototype.checkObject('defineType', {
     primitive: ['string', 'array'],
     type: 'string',
     pass: ['function', 'optional']
@@ -447,7 +449,7 @@ You.$$custom_optional = {
 var NotWontThrow = Object.create(You);
 NotWontThrow.willThrowError = false;
 You.NotWontThrow = NotWontThrow;
-exports = module.exports = You; //exports.Not = You
+exports = module.exports = You;
 
 },{}]},{},[1])(1)
 });

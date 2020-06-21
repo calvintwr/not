@@ -32,7 +32,7 @@ npm i --save you-are-not
 
 ### More on usage
 
-#### Default
+#### Default (will throw errors)
 ```js
 const Not = require('you-are-not') // `require` syntax
 import Not from 'you-are-not'      // or `import` syntax
