@@ -14,7 +14,7 @@
     "scripts": {
         "test": "mocha './test/' --recursive --exit -r esm",
         "cover": "nyc _mocha -- './test/' --recursive --exit -r esm",
-        "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+        "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
         "browserify": "browserify src/index.js > dist/not.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
         "browserify:minify": "browserify src/index.js > dist/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ] -p tinyify",
         "build": "npm run browserify && npm run browserify:minify"
