@@ -368,8 +368,8 @@ You.walkObject = function (name, expectObject, gotObject, returnPayload) {
 }
 
 You.defineType = function(payload) {
-    let prototype = this === You ? this : Object.getPrototypeOf(this)
-    let sanitised = prototype.checkObject('defineType', {
+    // use prototype You's checkObject
+    let sanitised = You.checkObject('defineType', {
         primitive: ['string', 'array'],
         type: 'string',
         pass: ['function', 'optional']
