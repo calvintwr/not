@@ -127,15 +127,16 @@ input.toLowerCase()
 
 ## Full Usage
 
-### Standard Example
+### Standard Example (with timestamp switched on)
 ```js
 const Not = require('you-are-not')
 // OR const Not = require('you-are-not')
 // OR import Not from 'you-are-not'
 // OR import { NotWontThrow as Not } from 'you-are-not'
 
+let not = Not.create({ timestamp: true }) // switch on the timestamp (otherwise is off by default)
+
 function test(foo, bar) {
-    let not = Not.create()
 
     // usage (accepts 4 arguments):
     not(
@@ -151,7 +152,7 @@ function test(foo, bar) {
         // (optional) name of the candidate
         // to prepare error message
 
-        '[MESSAGE or TIMESTAMP]'
+        '[ADDITIONAL NOTES]'
         // (optional) any additional notes
         // will be added to the message.
     )
@@ -162,7 +163,32 @@ function test(foo, bar) {
 }
 
 test(['foo'])
-// will throw or return string: Wrong Type (FOO): Expect type `string` but got `array`: ["foo"]. [MESSAGE or TIMESTAMP].
+// will throw or return string: Wrong Type (FOO): Expect type `string` but got `array`: ["foo"]. [ADDITIONAL NOTES]. (TS: XXXXXX)
+
+// if Plain Old Javascript Object (POJO) mode is switched on:
+not.messageInPOJO = true
+not.willThrowError = false // messageInPOJO only works if this is disabled
+
+console.log(test(['foo']))
+
+//outputs
+{
+    message: 'Wrong Type (FOO): Expect type `string` but got `array`: ["foo"]. [ADDITIONAL NOTES]. (TS: XXXXXX)',
+    expect: 'string',
+    got: ['foo'],
+    gotType: 'array',
+    name: 'FOO',
+    note: 'ADDITIONAL NOTES',
+    timestamp: timestamp
+}
+```
+
+### Options
+
+```js
+Not.willThrowError = true(default)/false
+Not.timestamp = true/false(default)
+Not.messageInPOJO = true/false(default) // messageInPOJO will only work if willThrowError is false.
 ```
 
 ### Need Heavy Lifting? Bulk Check Objects
@@ -170,6 +196,8 @@ test(['foo'])
 In the real world, the our API params checking is a ~~leaning~~ tower of code. *Not* makes it neat and produces super user-friendly error messages. *No one loses hair*:
 ```js
 import { NotWontThrow as Not } from 'you-are-not'
+NotWontThrow.timestamp = true
+NotWontThrow.messageInPOJO = true // we may prefer POJO mode
 
 // Usage 1:  Simple mode
 someAPIEndPoint((request, response) => {

@@ -1,12 +1,16 @@
 /*!
- * You-Are-Not v0.7.1
+ * You-Are-Not v0.7.2
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
 'use strict'
 
 const print = require('../lib/print.js')
-const You = { willThrowError: true }
+const You = { 
+    willThrowError: true,
+    timestamp: false,
+    messageInPOJO: false
+}
 
 /* Core properties/methods */
 
@@ -162,6 +166,7 @@ You.mapExpect = function(r, expect) {
 }
 
 You.msg = function(expect, got, gotType, name, note) {
+
     let msg = 'Wrong Type' // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
     let gotTypeListed = this.list(gotType)
     msg += name ? ` (${name})` : ''
@@ -169,7 +174,22 @@ You.msg = function(expect, got, gotType, name, note) {
     // no need to elaborate for null, undefined and nan
     msg += (['`null`', '`undefined`', '`nan`'].indexOf(gotTypeListed) > -1) ? '.' : `: ${print(got)}.`
     msg += note ? ` Note: ${note}.` : ''
+    if (this.timestamp) msg += ` (TS: ${new Date().getTime()})`
+
+    if (!this.willThrowError && this.messageInPOJO) return this.msgPOJO(msg, expect, got, gotType, name, note)
     return msg
+}
+
+You.msgPOJO = function(message, expect, got, gotType, name, note) {
+    return {
+        message: message,
+        expect: expect,
+        got: got,
+        gotType: gotType,
+        name: name,
+        note: note,
+        timestamp: new Date().getTime()
+    }
 }
 
 You.list = function(array, conjunction) {
@@ -413,6 +433,9 @@ You._applyOptions = function (descendant, options) {
     //using #_are because it's not writable and configurable
     if(this._are('object', options)) {
         if(this._are('boolean', options.willThrowError)) descendant.willThrowError = options.willThrowError
+        if(this._are('boolean', options.timestamp)) descendant.timestamp = options.timestamp
+        if(this._are('boolean', options.messageInPOJO)) descendant.messageInPOJO = options.messageInPOJO
+
         if(this._are('boolean', options.isOpinionated)) {
             descendant.isOpinionated = options.isOpinionated
             return

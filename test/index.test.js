@@ -896,3 +896,33 @@ describe('_are', () => {
         Not._are('object', []).should.be.false
     })
 })
+
+describe('timestamp', () => {
+    let tsNot = Object.create(Not).create({ timestamp: true })
+
+    it('should return message with timestamp when set to true', () => {
+        tsNot('array', 123).indexOf('(TS:').should.equal(58)
+    })
+})
+
+describe('messageInPOJO', () => {
+    let tsNot = Object.create(Not).create({ timestamp: true, messageInPOJO: true })
+
+    it('should return POJO', () => {
+        let pojo = tsNot('array', 123)
+        pojo.should.include({
+            got: 123,
+            gotType: 'number'
+        })
+        Object.keys(pojo).should.have.members([
+            'expect', 
+            'got', 
+            'gotType', 
+            'name', 
+            'note', 
+            'timestamp',
+            'message'
+        ])
+        pojo.expect.should.have.members([ 'array'])
+    })
+})

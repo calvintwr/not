@@ -18,7 +18,7 @@ module.exports = print;
 
 },{}],2:[function(require,module,exports){
 /*!
- * You-Are-Not v0.7.1
+ * You-Are-Not v0.7.2
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -29,7 +29,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 var print = require('../lib/print.js');
 
 var You = {
-  willThrowError: true
+  willThrowError: true,
+  timestamp: false,
+  messageInPOJO: false
 };
 /* Core properties/methods */
 // opinions
@@ -182,7 +184,21 @@ You.msg = function (expect, got, gotType, name, note) {
 
   msg += ['`null`', '`undefined`', '`nan`'].indexOf(gotTypeListed) > -1 ? '.' : ": ".concat(print(got), ".");
   msg += note ? " Note: ".concat(note, ".") : '';
+  if (this.timestamp) msg += " (TS: ".concat(new Date().getTime(), ")");
+  if (!this.willThrowError && this.messageInPOJO) return this.msgPOJO(msg, expect, got, gotType, name, note);
   return msg;
+};
+
+You.msgPOJO = function (message, expect, got, gotType, name, note) {
+  return {
+    message: message,
+    expect: expect,
+    got: got,
+    gotType: gotType,
+    name: name,
+    note: note,
+    timestamp: new Date().getTime()
+  };
 };
 
 You.list = function (array, conjunction) {
@@ -453,6 +469,8 @@ You._applyOptions = function (descendant, options) {
   //using #_are because it's not writable and configurable
   if (this._are('object', options)) {
     if (this._are('boolean', options.willThrowError)) descendant.willThrowError = options.willThrowError;
+    if (this._are('boolean', options.timestamp)) descendant.timestamp = options.timestamp;
+    if (this._are('boolean', options.messageInPOJO)) descendant.messageInPOJO = options.messageInPOJO;
 
     if (this._are('boolean', options.isOpinionated)) {
       descendant.isOpinionated = options.isOpinionated;
@@ -497,11 +515,6 @@ module.exports = function (Not) {
 };
 
 },{}],5:[function(require,module,exports){
-/*!
- * You-Are-Not v0.6.3
- * (c) 2020 Calvin Tan
- * Released under the MIT License.
- */
 'use strict';
 
 var Not = require('./You.js');
