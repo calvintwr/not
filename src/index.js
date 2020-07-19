@@ -1,8 +1,3 @@
-/*!
- * You-Are-Not v0.6.3
- * (c) 2020 Calvin Tan
- * Released under the MIT License.
- */
 'use strict'
 const Not = require('./You.js')
 
