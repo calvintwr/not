@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![install size](https://badgen.net/packagephobia/install/you-are-not?style=flat-square)](https://packagephobia.now.sh/result?p=you-are-not)
 
->*Not* is a minimal, blazing fast, intuitive, and customisable type-checking helper. Meet project deadlines. Code with accuracy. No compiling required. *Not* checks at runtime, useful to complement Typescript.
+>*Not* is a minimal, blazing fast, intuitive, and customisable type-checking helper. Meet project deadlines. Code with accuracy. No compiling required. *Not* checks at runtime, useful to complement Typescript. *Not* tells you exactly what has gone wrong with your inputs/arguments.
 
 *This module has no dependencies.*
 
@@ -77,7 +77,9 @@ let errors = Not.checkObject(
     schema,
     candidate
 )
-console.log(errors) // if check passes, errors will be false, else it will be an array of errors.
+
+// Not tells you exactly what has gone wrong with your inputs.
+console.log(errors) // [ "Wrong Type (objectName.number): Expecting type `number` but got `string`: "wrong type"." ]
 ```
 
 #### *Not* Also Has `#is`
@@ -99,7 +101,6 @@ Unlock flexibility of Javascript, where typing need not be strict, and functions
 
 ### Meet Deadlines With Accurate Code
 Write good code quickly; find the **balance** in code accuracy and writing speed.
-
 
 ## Double Negative Mechanism Explained
 *Not* prefers a more powerful "double negative" mechanism, to definitively return `false` when the check passes. It follows the sensible human logic -- "Let's check if something is wrong (not what I want), so that I will do something. Nope, lets move on":
@@ -160,7 +161,7 @@ function test(foo, bar) {
 }
 
 test(['foo'])
-// will throw or return string: Wrong Type (FOO): Expect type `string` but got `array`. [MESSAGE or TIMESTAMP].
+// will throw or return string: Wrong Type (FOO): Expect type `string` but got `array`: ["foo"]. [MESSAGE or TIMESTAMP].
 ```
 
 ### Need Heavy Lifting? Bulk Check Objects

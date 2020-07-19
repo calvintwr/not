@@ -1,4 +1,22 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Not = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+'use strict';
+
+function print(obj) {
+  if (obj == null || typeof obj === 'string' || typeof obj === 'number') return String(obj);
+
+  if (obj.length || Array.isArray(obj) || String(obj) === '[object Object]') {
+    return JSON.stringify(obj); //return '[' + Array.prototype.map.call(obj, print).join(', ') + ']';
+  }
+
+  if (typeof HTMLElement !== 'undefined' && obj instanceof HTMLElement) return '<' + obj.nodeName.toLowerCase() + '>';
+  if (typeof Text !== 'undefined' && obj instanceof Text) return '"' + obj.nodeValue + '"';
+  if (obj.toString) return obj.toString();
+  return String(obj);
+}
+
+module.exports = print;
+
+},{}],2:[function(require,module,exports){
 /*!
  * You-Are-Not v0.6.3
  * (c) 2020 Calvin Tan
@@ -7,6 +25,8 @@
 'use strict';
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+var print = require('../lib/print.js');
 
 var You = {
   willThrowError: true
@@ -41,7 +61,7 @@ Object.defineProperty(You, 'areNot', {
     expect = this.prepareExpect(expect);
     var gotType = this.type(got);
     if (this.found(expect, got, gotType)) return false;
-    var msg = this.msg(expect, gotType, name, note);
+    var msg = this.msg(expect, got, gotType, name, note);
     if (this.willThrowError) throw TypeError(msg);
     return msg;
   }
@@ -153,11 +173,14 @@ You.mapExpect = function (r, expect) {
   return r;
 };
 
-You.msg = function (expect, got, name, note) {
+You.msg = function (expect, got, gotType, name, note) {
   var msg = 'Wrong Type'; // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
 
+  var gotTypeListed = this.list(gotType);
   msg += name ? " (".concat(name, ")") : '';
-  msg += ": Expecting type ".concat(this.list(expect), " but got ").concat(this.list(got), ".");
+  msg += ": Expecting type ".concat(this.list(expect), " but got ").concat(gotTypeListed); // no need to elaborate for null, undefined and nan
+
+  msg += ['`null`', '`undefined`', '`nan`'].indexOf(gotTypeListed) > -1 ? '.' : ": ".concat(print(got), ".");
   msg += note ? " Note: ".concat(note, ".") : '';
   return msg;
 };
@@ -440,16 +463,57 @@ You._applyOptions = function (descendant, options) {
       if (_this4._are('boolean', options[optionKey])) descendant[optionKey] = options[optionKey];
     });
   }
-}; //Aggregators, or default non-primitive checks
+};
 
+module.exports = You;
 
-You.$$custom_optional = {
+},{"../lib/print.js":1}],3:[function(require,module,exports){
+'use strict';
+
+var type = 'integer';
+var define = {
+  primitive: ['number'],
+  pass: function pass(candidate) {
+    return candidate.toFixed(0) === candidate.toString();
+  }
+};
+
+module.exports = function (Not) {
+  Not["$$custom_".concat(type)] = define;
+  return Not;
+};
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
+var type = 'optional';
+var define = {
   primitive: ['null', 'undefined']
 };
-var NotWontThrow = Object.create(You);
-NotWontThrow.willThrowError = false;
-You.NotWontThrow = NotWontThrow;
-exports = module.exports = You;
 
-},{}]},{},[1])(1)
+module.exports = function (Not) {
+  Not["$$custom_".concat(type)] = define;
+  return Not;
+};
+
+},{}],5:[function(require,module,exports){
+/*!
+ * You-Are-Not v0.6.3
+ * (c) 2020 Calvin Tan
+ * Released under the MIT License.
+ */
+'use strict';
+
+var Not = require('./You.js');
+
+require('./customs/optional.js')(Not);
+
+require('./customs/integer.js')(Not);
+
+var NotWontThrow = Object.create(Not);
+NotWontThrow.willThrowError = false;
+Not.NotWontThrow = NotWontThrow;
+exports = module.exports = Object.create(Not);
+
+},{"./You.js":2,"./customs/integer.js":3,"./customs/optional.js":4}]},{},[5])(5)
 });

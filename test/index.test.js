@@ -66,8 +66,8 @@ describe('checking', () => {
 
         //object x []
         it('should return failure message when comparing [] as object', () => {
-            not('object', [], 'array')
-                .should.equal('Wrong Type (array): Expecting type `object` but got `array`.')
+            not('object', ['foobar'], 'array')
+                .should.equal('Wrong Type (array): Expecting type `object` but got `array`: ["foobar"].')
         })
 
         //object x null
@@ -128,7 +128,7 @@ describe('checking', () => {
 
         //optional and number x undefined
         it('should return error message when comparing optional with function', () => {
-            not('optional', function(){}).should.equal('Wrong Type: Expecting type `optional(null or undefined)` but got `function`.')
+            not('optional', function(){}).should.equal('Wrong Type: Expecting type `optional(null or undefined)` but got `function`: function(){}.')
         })
 
         //optional and number x undefined
@@ -246,7 +246,7 @@ describe('checking', () => {
 
         //object x []
         it('should still be opinionated and return failure message when comparing [] as object', () => {
-            noonan('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array`.')
+            noonan('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array`: [].')
         })
     })
 
@@ -293,7 +293,7 @@ describe('checking', () => {
 
         //object x []
         it('should still be opinionated and return failure message when comparing [] as object', () => {
-            noon('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array`.')
+            noon('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array`: [].')
         })
 
         //null x null
@@ -334,7 +334,7 @@ describe('checking', () => {
 
         //object x []
         it('should still be opinionated and return failure message when comparing [] as object', () => {
-            noos('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array`.')
+            noos('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array`: [].')
         })
     })
 
@@ -388,8 +388,8 @@ describe('checking', () => {
         //string x object
         it('should throw error when comparing string with object', () => {
             (()=> {
-                nwt(['string'], {})
-            }).should.Throw(TypeError, 'Wrong Type: Expecting type `string` but got `object`.')
+                nwt(['string'], {foo: 'bar'})
+            }).should.Throw(TypeError, 'Wrong Type: Expecting type `string` but got `object`: {"foo":"bar"}.')
         })
     })
 })
@@ -637,10 +637,10 @@ describe('checkObject', () => {
         errors.should.be.an('array')
         errors.length.should.equal(5)
         errors.should.include.members([
-            'Wrong Type (optionalsNoMatch.string): Expecting type `string` but got `array`.',
-            'Wrong Type (optionalsNoMatch.null): Expecting type `null` but got `boolean`.',
-            'Wrong Type (optionalsNoMatch.object.object.number): Expecting type `number` but got `array`.',
-            'Wrong Type (optionalsNoMatch.object.object.boolean): Expecting type `boolean` but got `function`.',
+            'Wrong Type (optionalsNoMatch.string): Expecting type `string` but got `array`: [].',
+            'Wrong Type (optionalsNoMatch.null): Expecting type `null` but got `boolean`: false.',
+            'Wrong Type (optionalsNoMatch.object.object.number): Expecting type `number` but got `array`: [].',
+            'Wrong Type (optionalsNoMatch.object.object.boolean): Expecting type `boolean` but got `function`: function() {}.',
             'Wrong Type (optionalsNoMatch.compulsoryObject): Expecting type `object` but got `undefined`.'
         ])
     })
@@ -737,7 +737,7 @@ describe('checkObject', () => {
         errors.should.be.an('array')
         errors.length.should.equal(1)
         errors.should.include.members([
-            'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `number`.',
+            'Wrong Type (optionalsMatch.optional.array): Expecting type `array` but got `number`: 123.',
         ])
     })
 
@@ -862,20 +862,6 @@ describe('defineType', () => {
         not.not(['length_five', 'function'], function() {}).should.be.false
     })
 
-    it('should return error message (#not) or false (#is) for custom integer test of 4.4', () => {
-        let not = Object.create(Not)
-
-        not.defineType({
-            primitive: 'number',
-            type: 'integer',
-            pass: function(candidate) {
-                return candidate.toFixed(0) === candidate.toString()
-            }
-        })
-        not.not('integer', 4.4).should.equal('Wrong Type: Expecting type `custom:integer` but got `number`.')
-        not.is('integer', 4.4).should.be.false
-    })
-
     it('should return error message (#not) or false (#is) falsey check', () => {
         let not = Object.create(Not)
 
@@ -893,7 +879,7 @@ describe('defineType', () => {
         })
 
         not.not('falsey', {}).should.be.false
-        not.not('falsey', [null]).should.equal('Wrong Type: Expecting type `custom:falsey` but got `array`.')
+        not.not('falsey', [null]).should.equal('Wrong Type: Expecting type `custom:falsey` but got `array`: [null].')
         not.is('falsey', []).should.be.true
         not.is('falsey', undefined).should.be.true
         not.is(['falsey', 'function'], function() {}).should.be.true

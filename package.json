@@ -1,6 +1,6 @@
 {
     "name": "you-are-not",
-    "version": "0.6.3",
+    "version": "0.7.0",
     "description": "Write accurate code. Meet deadlines. Maintain type flexibility. No compiling. A minimal, blazing fast, intuitive, and customisable type-checking helper that you are missing.",
     "main": "index.js",
     "browser": "dist/not.min.js",
