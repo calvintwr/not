@@ -128,7 +128,7 @@ describe('checking', () => {
 
         //optional and number x undefined
         it('should return error message when comparing optional with function', () => {
-            not('optional', function(){}).should.equal('Wrong Type: Expecting type `optional(null or undefined)` but got `function`: function(){}.')
+            not('optional', function () {}).should.equal('Wrong Type: Expecting type `optional(null or undefined)` but got `function`: function () {}.')
         })
 
         //optional and number x undefined
@@ -627,7 +627,7 @@ describe('checkObject', () => {
             object: {
                 object: {
                     number: [],
-                    boolean: function() {},
+                    boolean: function () {},
                     extraProperty: 'string'
                 }
             },
@@ -640,7 +640,7 @@ describe('checkObject', () => {
             'Wrong Type (optionalsNoMatch.string): Expecting type `string` but got `array`: [].',
             'Wrong Type (optionalsNoMatch.null): Expecting type `null` but got `boolean`: false.',
             'Wrong Type (optionalsNoMatch.object.object.number): Expecting type `number` but got `array`: [].',
-            'Wrong Type (optionalsNoMatch.object.object.boolean): Expecting type `boolean` but got `function`: function() {}.',
+            'Wrong Type (optionalsNoMatch.object.object.boolean): Expecting type `boolean` but got `function`: function () {}.',
             'Wrong Type (optionalsNoMatch.compulsoryObject): Expecting type `object` but got `undefined`.'
         ])
     })
