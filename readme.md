@@ -22,6 +22,7 @@ let testString    = 'string'
 let testNotString = 123
 not('string', testString) // will return false
 not('string', testNotString) // will throw error
+not('integer', testNotString) // will return false
 ```
 
 ## Installation
@@ -327,6 +328,9 @@ Primitives:
 
 Aggregated:
 'optional' // which means 'null' and 'undefined'
+
+Other custom types:
+'integer'
 ```
 
 ### Example - Checking Multiple Types
@@ -352,6 +356,7 @@ is(['string', 'number', 'array'], foo)
 ### Define your own checks
 
 #### Simple example
+*Not* has a built-in custom type called `integer`, and suppose if you were to define it yourself, it will look like this:
 ```js
 Not.defineType({
     primitive: 'number', // you must define your primitives
