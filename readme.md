@@ -1,5 +1,4 @@
-
-# You Are *Not*
+![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://dev-to-uploads.s3.amazonaws.com/i/4bs7198m86uofoyh0w6g.png)
 [![npm version](https://img.shields.io/npm/v/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![Build Status](https://badgen.net/travis/calvintwr/you-are-not?style=flat-square)](https://travis-ci.com/calvintwr/you-are-not)
 [![Coverage Status](https://badgen.net/coveralls/c/github/calvintwr/you-are-not?style=flat-square)](https://coveralls.io/r/calvintwr/you-are-not)
@@ -12,8 +11,6 @@
 *Not* gives **actionable** error messages, so you know exactly what has gone wrong with your inputs/arguments/API. Meet project deadlines. Code with accuracy. Build friendly APIs.
 
 **Not** is different from TypeScript. It is for runtime checking, and is API-centric/friendly in error handling/messaging. It complements Typescript.
-
-![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://dev-to-uploads.s3.amazonaws.com/i/4bs7198m86uofoyh0w6g.png)
 ![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://dev-to-uploads.s3.amazonaws.com/i/l74jrtmfy2p305fw9wvy.gif)
 
 *This module has no dependencies.*
