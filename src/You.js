@@ -1,12 +1,12 @@
 /*!
- * You-Are-Not v0.7.2
+ * You-Are-Not v0.7.3
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
 'use strict'
 
 const print = require('../lib/print.js')
-const You = { 
+const You = {
     willThrowError: true,
     timestamp: false,
     messageInPOJO: false

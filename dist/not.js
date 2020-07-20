@@ -18,7 +18,7 @@ module.exports = print;
 
 },{}],2:[function(require,module,exports){
 /*!
- * You-Are-Not v0.7.2
+ * You-Are-Not v0.7.3
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
