@@ -1,4 +1,4 @@
-![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://dev-to-uploads.s3.amazonaws.com/i/4bs7198m86uofoyh0w6g.png)
+![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://user-images.githubusercontent.com/6825277/104813085-cec3f780-5841-11eb-8dda-6871497a876c.png)
 [![npm version](https://img.shields.io/npm/v/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![Build Status](https://badgen.net/travis/calvintwr/you-are-not?style=flat-square)](https://travis-ci.com/calvintwr/you-are-not)
 [![Coverage Status](https://badgen.net/coveralls/c/github/calvintwr/you-are-not?style=flat-square)](https://coveralls.io/r/calvintwr/you-are-not)
@@ -22,7 +22,7 @@ console.log(sanitised)
 ## Why *Not*?
 *Not* gives **actionable** error messages, so you know exactly what has gone wrong with your inputs/arguments/API. Build friendly APIs. Meet project deadlines.
 
-![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://user-images.githubusercontent.com/6825277/104813085-cec3f780-5841-11eb-8dda-6871497a876c.png)
+![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://dev-to-uploads.s3.amazonaws.com/i/l74jrtmfy2p305fw9wvy.gif)
 
 *This module has no dependencies.*
 
