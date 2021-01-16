@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v0.7.5
+ * You-Are-Not v0.7.7
  * (c) 2020 Calvin Tan
  * Released under the MIT License.
  */
@@ -335,6 +335,11 @@ You.checkObject = function (name, expectObject, gotObject, callback) {
     not.walkObject(name, expectObject, gotObject)
     return not.resolve()
 }
+
+You.scrub = function (name, expectObject, gotObject) {
+    return this.checkObject(name, expectObject, gotObject, { returnPayload: true })
+}
+
 You.walkObject = function (name, expectObject, gotObject, returnPayload) {
     if(returnPayload) var sanitisedPayload = {}
     for(let i=0, keys = Object.keys(expectObject); i<keys.length; i++) {

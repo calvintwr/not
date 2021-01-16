@@ -5,33 +5,26 @@
 [![license](https://img.shields.io/npm/l/you-are-not.svg?style=flat-square)](https://www.npmjs.com/package/you-are-not)
 [![install size](https://badgen.net/packagephobia/install/you-are-not?style=flat-square)](https://packagephobia.now.sh/result?p=you-are-not)
 
->*Not* is a minimal, blazing fast, intuitive, API-centric, and customisable type-checking/validation/error handing and messaging helper -- all in a small and neat pack.
+>*Not* is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.
+
+```js
+let sanitised = Not.scrub(
+    "objectName",
+    { id: "number" }, // schema
+    { id: 1, role: "admin" } // payload, with malicious `role: "admin"` key/value
+)
+console.log(sanitised)
+// outputs:
+// { id: 1 }
+```
+`role: "admin"` is removed. Payload sanitised.
 
 ## Why *Not*?
-*Not* gives **actionable** error messages, so you know exactly what has gone wrong with your inputs/arguments/API. Meet project deadlines. Code with accuracy. Build friendly APIs.
+*Not* gives **actionable** error messages, so you know exactly what has gone wrong with your inputs/arguments/API. Build friendly APIs. Meet project deadlines.
 
-**Not** is different from TypeScript. It is for runtime checking, and is API-centric/friendly in error handling/messaging. It complements Typescript.
-![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://dev-to-uploads.s3.amazonaws.com/i/l74jrtmfy2p305fw9wvy.gif)
+![Not.Js - "All-in-one" type checking, validation, error handling and messaging.](https://user-images.githubusercontent.com/6825277/104813085-cec3f780-5841-11eb-8dda-6871497a876c.png)
 
 *This module has no dependencies.*
-
-
-**Quick Example of Code Reduction**
-
-Instead of the horrible:
-```js
-if (typeof foo !== 'string' ||
-    typeof foo !== 'number' ||
-    (typeof foo === 'number' && !isNaN(foo)) ||
-    !Array.isArray(foo)
-) {  throw Error("Not valid, but I don't know why.") }
-```
-You write:
-```js
-not(['string', 'number', 'array'], foo)
-// or
-is(['string', 'number', 'array'], foo)
-```
 
 ## Simple Usage
 
@@ -44,37 +37,82 @@ let schema = {
 }
 
 // payload may be a parsed body from API-requestors, or function arguments
-let payload = {
+let payloadWithTypeError = {
     id: "1", // this will error
+    name: "foo"
+}
+
+var sanitised = Not.scrub(
+    'payloadWithTypeError',
+    schema,
+    payloadWithTypeError
+)
+
+console.log(sanitised)
+```
+**console.log outputs actionable error messages:**
+```
+["Wrong Type (payloadWithTypeError.id): Expecting type `number` but got `string`: 1."]
+```
+
+To sanitise possible malicious payloads:
+```js
+let payloadWithMaliciousPayload = {
+    id: 1,
     name: "foo",
     role: "admin" // simulating malicious payload. this will be sanitised
 }
 
-let sanitised = Not.checkObject(
-    'objName',
+var sanitised = Not.scrub(
+    'payloadWithMaliciousPayload',
     schema,
-    payload,
-    { returnPayload: true }
+    payloadWithTypeError
 )
 
-// if failed: Not will throw TypeError, with an `trace` array containing error messages.
-// if passed: will be an Object with sanitised payload
-
-console.log(sanitised) // here you have a sanitised payload
-```
-**Actionable error messages:**
-```
-Wrong Type (objName.id): Expecting type `number` but got `string`: "1".
+console.log(sanitised)
 ```
 
+**Outputs:**
+
+```js
+{
+    id: 1,
+    name: "foo"
+}
+```
+`role: "admin"` is removed. Payload sanitised.
 
 ### 2. Lightweight ("simplified mode") type-checking
 
-Simplified mode cuts down verbiage. *Not* uses a **double negative mechanism** (it is more powerful and will be explain further below).
+Besides being a payload sanitiser, *Not* is a type-checker under-the-hood.
+
+Use *Not* to cuts down runtime type-checking verbiage.
+
+Instead of:
+
+```js
+if (typeof foo !== 'string' ||
+    typeof foo !== 'number' ||
+    (typeof foo === 'number' && !isNaN(foo)) ||
+    !Array.isArray(foo)
+) {  throw Error("Not valid, but I don't know why.") }
+```
+
+You write:
+
 ```js
 const Not = require('you-are-not')
 const not = Not.create() // this exposes a simplified #not with no overloads
+const is = Not.createIs()
 
+not(['string', 'number', 'array'], foo)
+// or
+is(['string', 'number', 'array'], foo)
+```
+
+Testing some variables:
+
+```js
 let testString    = 'string'
 let testNotString = 123
 
@@ -82,6 +120,7 @@ not('string', testString) // will return false
 not('string', testNotString) // will throw error
 not('integer', testNotString) // will return false
 ```
+ *Not* uses a **double negative mechanism** (it is more powerful and will be explain further below).
 
 ## Installation
 
@@ -89,87 +128,18 @@ not('integer', testNotString) // will return false
 npm i --save you-are-not
 ```
 
-## Basic Usage
-
-### 1. Disable error throwing
-
-Require/import `NotWontThrow`:
-```js
-// `require` syntax
-const Not = require('you-are-not').NotWontThrow
-// or `import` syntax
-import { NotWontThrow as Not } from 'you-are-not'      
-```
-Or overwrite with assignments:
-```js
-Not.willThrowError = false
-let test1 = Not.not('string', 123)
-let test2 = Not.is('number', 123)
-```
-Or if using simplified mode, pass in options `willThrowError: false`:
-```js
-let not = Not.create({ willThrowError: false })
-let test = not('string', 123)
-console.log(test) // 'Wrong Type: Expecting `string` but got `number`: 123.
-```
-
-### 2. Check Objects
-```js
-const Not = require('you-are-not')   // `require` syntax
-import Not from 'you-are-not' // `import` syntax
-
-// a schema that replicates intuitively your object structure
-let schema    = { string: 'string',     number: 'number'     }
-
-// `payload` is the object you want to test
-let payload = { string: 'correct type', number: 'I am string' }
-
-// compare `candidate` with our `schema`
-let errors = Not.checkObject(
-    'objectName', // specify a name for object
-    schema,
-    candidate
-)
-```
-In console, Not will tell you exactly what has gone wrong with your inputs.
-```
-> Error: Wrong types provided, See `trace`.
-      trace: [
-          "Wrong Type (objectName.number): Expecting type `number` but got `string`: "I am string"."
-      ]
-```
-Or if you have switched off error throwing:
-```js
-console.log(errors)
-// outputs:
-//"Wrong Type (objectName.number): Expecting type `number` but got `string`: "I am string"."
-
-// In API, send user this message:
-respondToUser(errors)
-```
-
-### 3. *Not* Also Has `#is`
-
-```js
-let is = Not.createIs()
-is('array', []) // returns true
-is('number', NaN) // throws error
-```
-*Note: #is does not throw by default.
-Because `#is` needs to return true when the check passes, it is not as powerful as `#not`.
-
-
-
 ## Double Negative Mechanism Explained
 *Not* prefers a more powerful "double negative" mechanism, to definitively return `false` when the check passes.
 
 It follows the sensible human logic -- "This is not what I want, let's stop and do something.":
+
 ```js
 if (not('string', 'i am string')) // do something
 // All good, let's move on.
 ```
 
 When *Not* fails, **it throws an error by default**. Or, you can switch to return a `string` **which can be used to evaluate to `true` to perform some operations!**
+
 ```js
 const not = Not.create({ willThrowError: false })
 // instead of throwing, `not` will return string
@@ -186,42 +156,10 @@ input.toLowerCase()
 
 ## Full Usage
 
-### 1. Options
-
-Customise *Not* with options.
-
-**By direct assignment to the *Not* prototype:**
-
-```js
-Not.willThrowError = true(default)/false
-Not.timestamp = true/false(default)
-Not.messageInPOJO = true/false(default) // messageInPOJO will only work if willThrowError is false.
-```
-(Note: POJO stands for **P**lain **O**ld **J**avascript **O**bject. JSON was considered except terminalogically not fully correct as the output may not always comply to JSON, given that it can contain functions.)
-
-**Or if you wish to use the simplified mode:**
-
-**Simplified**
-
-Sometimes you may only need simple `#not` or `#is`. You can use the simplified methods:
-```js
-const Not = require('you-are-not')
-
-let options = {
-    willThrowError: false,
-    timestamp: true,
-    messageInPOJO: true // messageInPOJO only works if this is disabled
-}
-let not = Not.create(options)
-let is = Not.createIs() // default usage without specifying options
-
-not('string', 123)
-is('number', 123)
-```
-
-### 2. Valid types
+### 1. Valid types
 
 **The valid types you can check for are:**
+
 ```js
 Primitives:
 'string'
@@ -242,8 +180,106 @@ Other custom types:
 'integer'
 ```
 
-### 3. Checking for Multiple Types
+### 2. #scrub/#checkObject
+#checkObject is #scrub under the hood. Use #scrub for simplified usage (example above), and #checkObject when you want more control.
 
+```js
+Not.scrub(objectName, schema, payload
+Not.checkObject(objectName, schema, payload, options)
+```
+
+`objectName`: (string) Name of object.
+
+`schema`: (object) An object depicting your schema.
+
+`payload`: (object) The payload to check for.
+
+`callback/options`: (function or object | optional). To receive a sanitised payload, set options `returnPayload` to `true` (see examples below).
+
+#### Defining Schema
+
+The schema looks exactly like the payload you are expecting.
+
+*Not* also has optional notation:
+```js
+// you can use optional notations like this:
+"info?": {
+    gender: 'string',
+    "age?": 'number'
+}
+//is same as
+info__optional: {
+    gender: 'string',
+    age__optional: 'number'
+}
+//is same as
+info__optional: {
+    gender: 'string',
+    age: ['number', 'optional']
+}
+```
+
+Check for multiple type by passing an array:
+
+```js
+info: {
+    age: ['number', 'string'], // age can be of type number or string
+    email: ['email'] // suppose you have created your own email validation checking. To create your own types, check examples below.
+}
+```
+
+#### #checkObject advanced usage
+1. If `callback/options` is a `callback` function, it will run the `callback`:
+
+```js
+checkObject(name, schema, payload, function(errors) {
+    // do something with errors.
+})
+```
+
+(Note: When callback is provided, Not assumes you want to handle things yourself, and will not throw errors regardless of the `willThrowError` flag.)
+
+2. If `callback/options` is `{ returnPayload: true }`, `#checkObject` returns (a) the sanitised payload (object) when check passes, (b) or an array of errors if check fails:
+
+```js
+let sanitised = checkObject(
+    name,
+    schema,
+    payload,
+    { returnPayload: true }
+)
+if (Array.isArray(sanitised) {
+    // do something with the errors
+    return
+}
+// or continue using the sanitised payload.
+DB.find(sanitised)
+```
+
+3. If `callback/options` is `{ callback: function() {}, returnPayload: true }`:
+
+```js
+let callback = function(errors, payload) {
+    if(errors.length > 0) {
+        // do something with the errors
+        return
+    }
+
+    DB.find(payload)
+}
+
+checkObject(
+    name,
+    schema,
+    payload,
+    {
+        returnPayload: true,
+        callback: callback
+    }
+)
+```
+
+### 3. *Not* as simple type checker
 You can also check for multiple types by passing an array. This is useful when you want your API to accept both string and number:
 ```js
 let not = Not.create()
@@ -257,15 +293,15 @@ not(['optional', 'string'], emailOptional) // if available, but be string.
 // all will evaluate to false.
 ```
 
-
-
 ### 4. Methods Available
 
 **The *Not* prototype has the following methods available:**
 ```js
+Not.scrub(objectName, schema, payload)
+Not.checkObject(objectName, schema, payload, options)
+
 Not.not(expect, got, name, note)
 Not.is(expect, got, name, note)
-Not.checkObject(objectName, schema, payload, options)
 
 Not.lodge(expect, got, name, note)
 Not.resolve([callback]) // this is used with #lodge.
@@ -290,131 +326,8 @@ Not.is(expect, got, name, note)
 1. If passed: `false`.
 2. If failed: throws `TypeError` (default), `string`  (if `willNotThrow: false`) or `POJO/JSON` (if `messageInPOJO: true`).
 
-### 6. Methods: `#checkObject`
 
-```js
-Not.checkObject(objectName, schema, payload, options)
-```
-
-`objectName`: (string) Name of object.
-
-`schema`: (object) An object depicting your schema.
-
-`payload`: (object) The payload to check for.
-
-`callback/options`: (function or object | optional). To receive a sanitised payload, set options `returnPayload` to `true` (see examples 2 or 3 below).
-
-**Returns:**
-1. If `callback/options` is a `callback` function, it will run the `callback`:
-```js
-checkObject(name, schema, payload, function(errors) {
-    // do something with errors.
-})
-```
-(Note: When callback is provided, Not assumes you want to handle things yourself, and will not throw errors regardless of the `willThrowError` flag.)
-
-2. If `callback/options` is `{ returnPayload: true }`, `#checkObject` returns (a) the sanitised payload (object) when check passes, (b) or an array of errors if check fails:
-```js
-let sanitised = checkObject(
-    name,
-    schema,
-    payload,
-    { returnPayload: true }
-)
-if (Array.isArray(sanitised) {
-    // do something with the errors
-    return
-}
-// or continue using the sanitised payload.
-DB.find(sanitised)
-```
-
-3. If `callback/options` is `{ callback: function() {}, returnPayload: true }`:
-```js
-let callback = function(errors, payload) {
-    if(errors.length > 0) {
-        // do something with the errors
-        return
-    }
-
-    DB.find(payload)
-}
-
-checkObject(
-    name,
-    schema,
-    payload,
-    {
-        returnPayload: true,
-        callback: callback
-    }
-)
-```
-
-### 7. Methods: `#checkObject` - More on Defining Schema
-
-The schema looks exactly like the payload you are expecting.
-
-*Not* also has optional notation:
-```js
-// you can use optional notations like this:
-"info?": {
-    gender: 'string',
-    "age?": 'number'
-}
-//is same as
-info__optional: {
-    gender: 'string',
-    age__optional: 'number'
-}
-//is same as
-info__optional: {
-    gender: 'string',
-    age: ['number', 'optional']
-}
-```
-
-### 8. Methods: `#checkObject` - Sanitisation Logic
-
-*Not* can sanitise your payload:
-
-```js
-let schema = {
-    valid: 'string',
-    toSanitise: {
-        keepThis: 'array'
-    }
-}
-let payload = {
-    valid: 'abc',
-    toSanitise: {
-        keepThis: [],
-        omitThis: 123
-    }
-}
-let sanitised = Not.checkObject(
-    'request',
-    schema,
-    payload, {
-        returnPayload: true
-    }
-})
-
-// if `sanitised` is an array, means something failed.
-if(Array.isArray(sanitised)) {
-    throw sanitised
-}
-
-console.log(sanitised)
-// outputs:
-{
-    valid: 'abc',
-    toSanitise: {
-        keepThis: []
-    }
-}
-```
-## 9. Methods: `#defineType`: Define your own checks
+### 6. Methods: `#defineType`: Define your own checks
 
 #### Simple example
 *Not* has a built-in custom type called `integer`, and suppose if you were to define it yourself, it will look like this:
@@ -427,6 +340,12 @@ Not.defineType({
         // or ES6:
         // return Number.isInteger(candidate)
     }
+})
+
+let schema = { age: 'integer' }
+
+Not.scrub('name', schema, {
+    age: 22.4 // this will fail
 })
 Not.not('integer', 4.4) // gives error message
 Not.is('integer', 4.4) // returns false
@@ -459,8 +378,7 @@ Not.is('falsey', undefined) // returns true
 Not.is(['falsey', 'function'], function() {}) // returns true
 ```
 
-### 10. Methods: `#lodge` and `#resolve`
-
+### 7. Methods: `#lodge` and `#resolve`
 
 You can also use `#lodge` And `#resolve` to bulk checking with more control:
 
@@ -484,7 +402,7 @@ apiNot.resolve(errors => {
 (Note: This will not return any payload, since you intended to micro-manage.)
 
 
-### 11. POJO Output
+### 8. POJO Output
 `messageInPOJO: true`
 ```js
 let not = Not.create({
@@ -577,9 +495,17 @@ CustomNot.msg = function(expect, got, gotType, name, note) {
 ```js
 let customNot = CustomNot.create()
 global.isDeveloperMode = true
+
+let sanitised = customNot.scrub('someWrongInput', {
+    someValue: 'string' // schema
+}, {
+    someValue: []
+})
+
+// or if using just the type checker:
 customNot('string', [], 'someWrongInput', 'file.js - xxx function')
 ```
-Will throw:
+Will give error:
 ```
 ! Error: Hey there! We are sorry that something broke, please try again! [Hint: (someWrongInput) expect string got array at file.js - xx function. ]
 ```
