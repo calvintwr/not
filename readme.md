@@ -8,10 +8,13 @@
 >*Not* is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.
 
 ```js
+let schema    = { id: "number" } // endpoint only expects param "id"
+let malicious = { id: 1, role: "admin" } //payload with malicious "role: admin"
+
 let sanitised = Not.scrub(
     "objectName",
-    { id: "number" }, // schema
-    { id: 1, role: "admin" } // payload, with malicious `role: "admin"` key/value
+    schema
+    payload
 )
 console.log(sanitised)
 // outputs:

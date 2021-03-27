@@ -1,6 +1,6 @@
 {
     "name": "you-are-not",
-    "version": "0.7.7",
+    "version": "0.7.8",
     "description": "*Not* is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.",
     "main": "index.js",
     "browser": "dist/not.min.js",
