@@ -1,2 +1,5 @@
 'use strict'
-module.exports = require('./src/index.js')
+import Not from './js/You.js'
+
+export default Not
+module.exports = require('./js/index.js')

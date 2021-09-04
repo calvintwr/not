@@ -4,8 +4,10 @@ const type = 'optional'
 const define = {
     primitive: ['null', 'undefined']
 }
-
-module.exports = function(Not) {
+const append = (Not: any) => {
     Not[`$$custom_${type}`] = define
     return Not
 }
+
+export default append
+module.exports = append

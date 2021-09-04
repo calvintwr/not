@@ -1,8 +1,11 @@
 'use strict'
 
-const Not = require('../../src/You.js')
-require('../../src/customs/integer.js')(Not)
-const should = require('chai').should()
+import Not from '../../js/You.js'
+import integer from '../../js/customs/integer.js'
+import NotTypeError from '../../js/core/NotTypeError.js'
+integer(Not)
+import chai from 'chai'
+chai.should()
 
 describe('custom type: integer', function() {
     it('should return false when candidate is integer', () => {
@@ -11,11 +14,11 @@ describe('custom type: integer', function() {
     it('should throw error when candidate is not integer (string of 1)', () => {
         (()=> {
             Not.not('integer', "1")
-        }).should.Throw(TypeError, 'Wrong Type: Expecting type `custom:integer` but got `string`: 1.')
+        }).should.Throw(NotTypeError, 'Wrong Type: Expecting type `custom:integer` but got `string` with value of `1`.')
     })
     it('should throw error when candidate is not integer (float 1.1)', () => {
         (()=> {
             Not.not('integer', 1.1)
-        }).should.Throw(TypeError, 'Wrong Type: Expecting type `custom:integer` but got `number`: 1.1.')
+        }).should.Throw(NotTypeError, 'Wrong Type: Expecting type `custom:integer` but got `number` with value of `1.1`.')
     })
 })

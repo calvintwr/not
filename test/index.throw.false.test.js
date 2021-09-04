@@ -1,11 +1,16 @@
 'use strict'
 
-import Not from '../index.js'
-import NotTypeError from '../js/core/NotTypeError.js'
-import chai from 'chai'
-chai.should()
+//const Not = require('../index.js')
+// ES6
+import NotProto from '../index.js'
+const Not = NotProto.create({ throw: false })
 
-describe('checking', () => {
+// ES6 Shorthand
+//import { NotWontThrow as Not } from '../index.js'
+
+const should = require('chai').should()
+
+describe('checking (throw=false)', () => {
     describe('checking - opinionated via #create', () => {
         const not = Not.createNot()
         //string x string
@@ -28,28 +33,20 @@ describe('checking', () => {
             not('number', 0).should.be.false
         })
 
-        //number x Infinity
+        //numer x Infinity
         it('should return false when comparing Infinity as a number', () => {
             not('number', -Infinity).should.be.false
         })
 
-        //number x #Number(number)
-        it('should return false when comparing number instantiated by #Number as a number', () => {
-            not('number', new Number(99)).should.be.false
-        })
-
         //number x NaN
-        it('should throw failure message when comparing NaN as a number', () => {
-            (() => {
-                not('number', NaN, 'NaN test', 'This is an opinion that NaN should not be number')
-            }).should.Throw(TypeError, 'Wrong Type (NaN test): Expecting type `number` but got `nan`. Note: This is an opinion that NaN should not be number.')
+        it('should return failure message when comparing NaN as a number', () => {
+            not('number', NaN, 'NaN test', 'This is an opinion that NaN should not be number')
+                .should.equal('Wrong Type (NaN test): Expecting type `number` but got `nan`. Note: This is an opinion that NaN should not be number.')
         })
 
         // number x new #Number(NaN)
-        it('should throw failure message comparing #Number(NaN) as a number', () => {
-            (() => {
-                not('number', new Number(NaN))
-            }).should.Throw(TypeError, 'Wrong Type: Expecting type `number` but got `nan`.')
+        it('should return failure message comparing #Number(NaN) as a number', () => {
+            not('number', new Number(NaN)).should.equal('Wrong Type: Expecting type `number` but got `nan`.')
         })
 
         //array x []
@@ -68,17 +65,15 @@ describe('checking', () => {
         })
 
         //object x []
-        it('should throw failure message when comparing [] as object', () => {
-            (() => {
-                not('object', ['foobar'], 'array')
-            }).should.Throw(NotTypeError, 'Wrong Type (array): Expecting type `object` but got `array` with value of `["foobar"]`.')
+        it('should return failure message when comparing [] as object', () => {
+            not('object', ['foobar'], 'array')
+                .should.equal('Wrong Type (array): Expecting type `object` but got `array` with value of `["foobar"]`.')
         })
 
         //object x null
-        it('should throw failure message when comparing null as object', () => {
-            (() => {
-                not('object', null)
-            }).should.Throw(NotTypeError, 'Wrong Type: Expecting type `object` but got `null`.')
+        it('should return failure message when comparing null as object', () => {
+            not('object', null)
+                .should.equal('Wrong Type: Expecting type `object` but got `null`.')
         })
 
         //function x function
@@ -97,17 +92,13 @@ describe('checking', () => {
         })
 
         //bolean x null
-        it('should throw failure message when comparing `null` as `bolean`', () => {
-            (() => {
-                not('boolean', null)
-            }).should.Throw(NotTypeError, 'Wrong Type: Expecting type `boolean` but got `null`.')
+        it('should return failure message when comparing `null` as `bolean`', () => {
+            not('boolean', null).should.equal('Wrong Type: Expecting type `boolean` but got `null`.')
         })
 
         //bolean x undefined
-        it('should throw failure message when comparing `null` as `bolean`', () => {
-            (() => {
-                not('boolean', undefined)
-            }).should.Throw(NotTypeError, 'Wrong Type: Expecting type `boolean` but got `undefined`.')
+        it('should return failure message when comparing `null` as `bolean`', () => {
+            not('boolean', undefined).should.equal('Wrong Type: Expecting type `boolean` but got `undefined`.')
         })
 
         //null
@@ -136,10 +127,8 @@ describe('checking', () => {
         })
 
         //optional and number x undefined
-        it('should throw error message when comparing optional with function', () => {
-            (() => {
-                not('optional', function () {})
-            }).should.Throw(NotTypeError, 'Wrong Type: Expecting type `optional(null or undefined)` but got `function` with value of `function () {}`.')
+        it('should return error message when comparing optional with function', () => {
+            not('optional', function () {}).should.equal('Wrong Type: Expecting type `optional(null or undefined)` but got `function` with value of `function () {}`.')
         })
 
         //optional and number x undefined
@@ -150,12 +139,11 @@ describe('checking', () => {
         it('should throw error when passing expect as non-string', () => {
             (()=> {
                 not([[], 'string'], new String())
-            }).should.Throw(NotTypeError, 'Internal error: Say what you expect to check as a string. Found `array`.')
+            }).should.Throw(TypeError, 'Internal error: Say what you expect to check as a string. Found `array`.')
         })
     })
 
     describe('checking - not opinionated via #createNot', () => {
-
         let not2 = Object.create(Not)
         not2.isOpinionated = false
         let notOpinionated = not2.createNot()
@@ -182,12 +170,13 @@ describe('checking', () => {
         })
 
         //array x []
-        it('should return false when comparing array', () => {
+        it('should return failure message when comparing array', () => {
             notOpinionated('array', [1,2, function() {}]).should.be.false
+
         })
 
         //array x new Array()
-        it('should throw failure message when comparing instanceof #Array', () => {
+        it('should return failure message when comparing instanceof #Array', () => {
             notOpinionated('array', new Array()).should.be.false
         })
 
@@ -256,10 +245,8 @@ describe('checking', () => {
         })
 
         //object x []
-        it('should still be opinionated and throw failure message when comparing [] as object', () => {
-            (() => {
-                noonan('object', [], 'array')
-            }).should.throw(NotTypeError, 'Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
+        it('should still be opinionated and return failure message when comparing [] as object', () => {
+            noonan('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
         })
     })
 
@@ -274,10 +261,8 @@ describe('checking', () => {
         })
 
         //number x NaN
-        it('should still be opinionated and throw failure message when when comparing NaN as a number', () => {
-            (() => {
-                nooa(['number', 'object', 'string'], NaN)
-            }).should.throw(NotTypeError, 'Wrong Type: Expecting type `number`, `object` or `string` but got `nan`.')
+        it('should still be opinionated and return failure message when when comparing NaN as a number', () => {
+            nooa(['number', 'object', 'string'], NaN).should.equal('Wrong Type: Expecting type `number`, `object` or `string` but got `nan`.')
         })
 
         //object x []
@@ -302,18 +287,13 @@ describe('checking', () => {
         })
 
         //number x NaN
-        it('should still be opinionated and throw failure message when when comparing NaN as a number', () => {
-
-            (() => {
-                noon(['number', 'object', 'string'], NaN)
-            }).should.throw(NotTypeError, 'Wrong Type: Expecting type `number`, `object` or `string` but got `nan`.')
+        it('should still be opinionated and return failure message when when comparing NaN as a number', () => {
+            noon(['number', 'object', 'string'], NaN).should.equal('Wrong Type: Expecting type `number`, `object` or `string` but got `nan`.')
         })
 
         //object x []
-        it('should still be opinionated and throw failure message when comparing [] as object', () => {
-            (() => {
-                noon('object', [], 'array')
-            }).should.throw(NotTypeError, 'Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
+        it('should still be opinionated and return failure message when comparing [] as object', () => {
+            noon('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
         })
 
         //null x null
@@ -348,17 +328,13 @@ describe('checking', () => {
         })
 
         //number x NaN
-        it('should still be opinionated and throw failure message comparing NaN as a number', () => {
-            (() => {
-                noos('number', NaN)
-            }).should.throw(NotTypeError, 'Wrong Type: Expecting type `number` but got `nan`.')
+        it('should still be opinionated and return failure message comparing NaN as a number', () => {
+            noos('number', NaN).should.equal('Wrong Type: Expecting type `number` but got `nan`.')
         })
 
         //object x []
-        it('should still be opinionated and throw failure message when comparing [] as object', () => {
-            (() => {
-                noos('object', [], 'array')
-            }).should.throw(NotTypeError, 'Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
+        it('should still be opinionated and return failure message when comparing [] as object', () => {
+            noos('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
         })
     })
 
@@ -379,17 +355,12 @@ describe('checking', () => {
 
         //number x new #Number
         it('should return false when comparing #Number to number', () => {
-            (() => {
-                noonumber('number', new Number(1))
-            }).should.throw(NotTypeError, 'Wrong Type: Expecting type `number` but got `object` with value of `1`.')
+            noonumber('number', new Number(1)).should.equal('Wrong Type: Expecting type `number` but got `object` with value of `1`.')
         })
 
         //number x new #Number(NaN)
-        //in native, typeof new Number(NaN) is object
-        it('should throw failure message when false comparing #Number(NaN) as a number', () => {
-            (() => {
-                noonumber('number', new Number(NaN))
-            }).should.throw(NotTypeError, 'Wrong Type: Expecting type `number` but got `nan` or `object` with value of `NaN`.')
+        it('should still be opinionated and return failure message comparing #Number(NaN) as a number', () => {
+            noonumber('number', new Number(NaN)).should.equal('Wrong Type: Expecting type `number` but got `nan` or `object` with value of `NaN`.')
         })
     })
 
@@ -406,6 +377,19 @@ describe('checking', () => {
         //bool x new #Boolean
         it('should return false when comparing #Boolean to object', () => {
             noobool('object', new Boolean(true)).should.be.false
+        })
+    })
+
+    describe('checking - willThrowError turned on', () => {
+        const nwt = Not.createNot({
+            willThrowError: true
+        })
+
+        //string x object
+        it('should throw error when comparing string with object', () => {
+            (()=> {
+                nwt(['string'], {foo: 'bar'})
+            }).should.Throw(TypeError, 'Wrong Type: Expecting type `string` but got `object` with value of `{"foo":"bar"}`.')
         })
     })
 })

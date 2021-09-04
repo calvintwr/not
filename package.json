@@ -1,7 +1,7 @@
 {
     "name": "you-are-not",
-    "version": "0.7.8",
-    "description": "*Not* is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.",
+    "version": "1.0.0",
+    "description": "Runtime type-checking written in TypeScript -- Not is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.",
     "main": "index.js",
     "browser": "dist/not.min.js",
     "browserslist": "> 1%, last 2 versions",
@@ -15,9 +15,11 @@
         "test": "mocha './test/' --recursive --exit -r esm",
         "cover": "nyc _mocha -- './test/' --recursive --exit -r esm",
         "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
-        "browserify": "browserify src/index.js > dist/not.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
-        "browserify:minify": "browserify src/index.js > dist/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ] -p tinyify",
-        "build": "npm run browserify && npm run browserify:minify"
+        "browserify": "browserify js/index.js > dist/not.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
+        "browserify:minify": "browserify js/index.js > dist/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ] -p tinyify",
+        "build": "npm run tsc & npm run browserify && npm run browserify:minify",
+        "tsc": "tsc",
+        "dev": "tsc --watch"
     },
     "repository": {
         "type": "git",
@@ -45,6 +47,7 @@
     "devDependencies": {
         "@babel/core": "^7.10.5",
         "@babel/preset-env": "^7.10.4",
+        "@types/node": "^16.7.10",
         "babelify": "^10.0.0",
         "browserify": "^16.5.1",
         "chai": "^4.2.0",
@@ -52,13 +55,18 @@
         "esm": "^3.2.25",
         "mocha": "^7.2.0",
         "mocha-lcov-reporter": "^1.3.0",
+        "nodemon": "^2.0.12",
         "nyc": "^15.1.0",
-        "tinyify": "^2.5.2"
+        "tinyify": "^2.5.2",
+        "ts-node": "^10.2.1",
+        "tslint": "^6.1.3",
+        "typescript": "^4.3.5"
     },
     "files": [
         "index.js",
         "src",
         "dist",
         "lib"
-    ]
+    ],
+    "dependencies": {}
 }
