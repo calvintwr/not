@@ -1,5 +1,3 @@
 'use strict'
-import Not from './js/You.js'
-
+import Not from './dist/node/index.js'
 export default Not
-module.exports = require('./js/index.js')

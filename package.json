@@ -1,8 +1,12 @@
 {
     "name": "you-are-not",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Runtime type-checking written in TypeScript -- Not is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.",
-    "main": "index.js",
+    "main": "index.cjs",
+    "exports": {
+        "import": "./index.js",
+        "require": "./index.cjs"
+    },
     "browser": "dist/not.min.js",
     "browserslist": "> 1%, last 2 versions",
     "engines": {
@@ -15,9 +19,10 @@
         "test": "mocha './test/' --recursive --exit -r esm",
         "cover": "nyc _mocha -- './test/' --recursive --exit -r esm",
         "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
-        "browserify": "browserify js/index.js > dist/not.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
-        "browserify:minify": "browserify js/index.js > dist/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ] -p tinyify",
+        "browserify": "browserify dist/node/index.js > dist/browser/not.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ]",
+        "browserify:minify": "browserify dist/node/index.js > dist/browser/not.min.js --standalone Not --global-transform [ babelify --configFile ./.dist.babelrc ] -p tinyify",
         "build": "npm run tsc & npm run browserify && npm run browserify:minify",
+        "prepublishOnly": "npm run build",
         "tsc": "tsc",
         "dev": "tsc --watch"
     },

@@ -7,12 +7,6 @@ export default
         opinionatedOnArray    : true
         ,
         opinionatedOnNull     : true
-        ,
-        opinionatedOnString   : true
-        ,
-        opinionatedOnNumber   : true
-        ,
-        opinionatedOnBoolean  : true
     }
 
 ): string | Array<string> => {
@@ -29,13 +23,6 @@ export default
         // everything else is in the clear
         return typeof got
     } 
-    
-    else if (typeof got === 'object' && got instanceof Number) {
-        // deal with the typeof new Number(NaN) being 'object'
-        
-    }
-
-    
 
     // objects... get rid of all the problems typeof [] or null is `object`.
     if (Array.isArray(got)) {
@@ -54,30 +41,5 @@ export default
         }
     }
     
-    if (got instanceof String) {
-        if (opinionFlags.opinionatedOnString === false) {
-            return ['string', 'object']
-        } else {
-            return 'string'
-        }
-    }
-
-    if (got instanceof Number) {
-        if (opinionFlags.opinionatedOnNumber === false) {
-            if( isNaN(got.valueOf()) ) return ['nan', 'object']
-            return ['object']
-        } else {
-            if( isNaN(got.valueOf()) ) return 'nan'
-            return 'number'
-        }
-    }
-
-    if (got instanceof Boolean) {
-        if (opinionFlags.opinionatedOnBoolean === false) {
-            return ['boolean', 'object']
-        } else {
-            return 'boolean'
-        }
-    }
     return 'object'
 }

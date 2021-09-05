@@ -1,5 +1,5 @@
 /*!
- * You-Are-Not v1.0.0
+ * You-Are-Not v1.0.1
  * (c) 2020-2021 Calvin Tan
  * Released under the MIT License.
  */
@@ -33,9 +33,6 @@ const You: YouType = {
     , opinionatedOnNaN      : true
     , opinionatedOnArray    : true
     , opinionatedOnNull     : true
-    , opinionatedOnString   : true
-    , opinionatedOnNumber   : true
-    , opinionatedOnBoolean  : true
     , _isOpinionated        : true
 
     // isOpinionated getters and setters
@@ -45,9 +42,6 @@ const You: YouType = {
         this.opinionatedOnNaN      = value
         this.opinionatedOnArray    = value
         this.opinionatedOnNull     = value
-        this.opinionatedOnString   = value
-        this.opinionatedOnNumber   = value
-        this.opinionatedOnBoolean  = value
         this._isOpinionated        = value
     }
 

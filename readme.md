@@ -8,7 +8,8 @@
 >*Not* is the minimal and blazingly fast "implement-and-forget" runtime type-checking library written in TypeScript for instant API payload checking and sanitisation, with ready-to-use error response messages to your API requestors -- all in a small and neat pack.
 
 ```ts
-import Not from 'you-are-not'
+import Not from 'you-are-not' // ES import syntax
+const Not = require('you-are-not') // CJS require syntax
 
 let schema    = { id: "number" } // endpoint only expects param "id"
 let malicious = { id: 1, role: "admin" } //payload with malicious "role: admin"
@@ -453,7 +454,6 @@ Those are technically not wrong (or debatable), but often gets in the way.
 1. `NaN` is not a **'number'**, and will be **'nan'**.
 2. `Array` and `[]` are of **'array'** type, and not **'object'**.
 3. `null` is **'null'** and not an **'object'**.
-4. Instance of `new` `#String`, `#Number` or `#Boolean` are their not of type **'object'** but their respective types.
 
 **Switch Off *Not*'s Opinions:**
 
@@ -473,10 +473,7 @@ not('object', null) // returns false -- `null` is an object
 let NotWithPartialOpinions = Not.createIs({
     opinionatedOnNaN:     false,
     opinionatedOnArray:   false,
-    opinionatedOnNull:    false,
-    opinionatedOnString:  false,
-    opinionatedOnNumber:  false,   
-    opinionatedOnBoolean: false
+    opinionatedOnNull:    false
 })
 
 // or mutate the object before instantiating.
@@ -484,10 +481,7 @@ let NotWithPartialOpinions = Object.create(Not)
 Object.assign(NotWithPartialOptions, {
     opinionatedOnNaN:     false,
     opinionatedOnArray:   false,
-    opinionatedOnNull:    false,
-    opinionatedOnString:  false,
-    opinionatedOnNumber:  false,   
-    opinionatedOnBoolean: false
+    opinionatedOnNull:    false
 })
 let not = NotWithPartialOpinions.create()
 let is  = NotWithPartialOpinions.createIs()

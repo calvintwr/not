@@ -20,7 +20,7 @@ describe('checking (throw=false)', () => {
 
         //string x #String
         it('should return false when comparing #String with string', () => {
-            not('string', new String('foo')).should.be.false
+            not('string', new String('foo')).should.equal('Wrong Type: Expecting type `string` but got `object` with value of `"foo"`.')
         })
 
         //number x 123
@@ -46,7 +46,7 @@ describe('checking (throw=false)', () => {
 
         // number x new #Number(NaN)
         it('should return failure message comparing #Number(NaN) as a number', () => {
-            not('number', new Number(NaN)).should.equal('Wrong Type: Expecting type `number` but got `nan`.')
+            not('number', new Number(NaN)).should.equal('Wrong Type: Expecting type `number` but got `object` with value of `NaN`.')
         })
 
         //array x []
@@ -88,7 +88,7 @@ describe('checking (throw=false)', () => {
 
         //boolean x true
         it('should return false when comparing `new #Boolean` as `bolean`', () => {
-            not('boolean', new Boolean(false)).should.be.false
+            not('boolean', new Boolean(false)).should.equal('Wrong Type: Expecting type `boolean` but got `object` with value of `false`.')
         })
 
         //bolean x null
@@ -112,8 +112,8 @@ describe('checking (throw=false)', () => {
         })
 
         //Array & string x #String
-        it('should return false when comparing array or string with #String', () => {
-            not(['array', 'string'], new String()).should.be.false
+        it('should return error when comparing array or string with #String', () => {
+            not(['array', 'string'], new String()).should.equal('Wrong Type: Expecting type `array` or `string` but got `object` with value of ``.')
         })
 
         //optional x undefined
@@ -151,11 +151,6 @@ describe('checking (throw=false)', () => {
         //string x string
         it('should return false when comparing string', () => {
             notOpinionated('string', '').should.be.false
-        })
-
-        //object x #String
-        it('should return false when comparing #String to object', () => {
-            not2.not('object', new String('foo')).should.be.false
         })
 
         //number x 123
@@ -217,11 +212,6 @@ describe('checking (throw=false)', () => {
             notOpinionated(['null', 'object'], null).should.be.false
         })
 
-        //Array & string x #String
-        it('should return false when comparing array or string with #String', () => {
-            notOpinionated(['array', 'string'], new String()).should.be.false
-        })
-
         it('should throw error when passing expect as non-string', () => {
             (()=> {
                 notOpinionated([[], 'string'], new String())
@@ -232,11 +222,6 @@ describe('checking (throw=false)', () => {
     describe('checking - not opinionated on NaN', () => {
         const noonan = Not.createNot({
             opinionatedOnNaN: false
-        })
-
-        //string x #String
-        it('should return false when comparing #String to string', () => {
-            noonan('string', new String('foo')).should.be.false
         })
 
         //number x NaN
@@ -253,11 +238,6 @@ describe('checking (throw=false)', () => {
     describe('checking - not opinionated on array', () => {
         const nooa = Not.createNot({
             opinionatedOnArray: false
-        })
-
-        //string x #String
-        it('should return false when comparing #String to string', () => {
-            nooa('string', new String('foo')).should.be.false
         })
 
         //number x NaN
@@ -281,11 +261,6 @@ describe('checking (throw=false)', () => {
             opinionatedOnNull: false
         })
 
-        //string x #String
-        it('should return false when comparing #String to string', () => {
-            noon('string', new String('foo')).should.be.false
-        })
-
         //number x NaN
         it('should still be opinionated and return failure message when when comparing NaN as a number', () => {
             noon(['number', 'object', 'string'], NaN).should.equal('Wrong Type: Expecting type `number`, `object` or `string` but got `nan`.')
@@ -304,79 +279,6 @@ describe('checking (throw=false)', () => {
         //null x object
         it('should return false when comparing object with null', () => {
             noon('object', null).should.be.false
-        })
-    })
-
-    describe('checking - not opinionated on string only', () => {
-        const noos = Not.createNot({
-            opinionatedOnString: false
-        })
-
-        //string x string
-        it('should return false when comparing string', () => {
-            noos('string', '').should.be.false
-        })
-
-        //object x #String
-        it('should return false when comparing #String to object', () => {
-            noos('object', new String('foo')).should.be.false
-        })
-
-        //string x #String
-        it('should return false when comparing #String to string', () => {
-            noos('string', new String('foo')).should.be.false
-        })
-
-        //number x NaN
-        it('should still be opinionated and return failure message comparing NaN as a number', () => {
-            noos('number', NaN).should.equal('Wrong Type: Expecting type `number` but got `nan`.')
-        })
-
-        //object x []
-        it('should still be opinionated and return failure message when comparing [] as object', () => {
-            noos('object', [], 'array').should.equal('Wrong Type (array): Expecting type `object` but got `array` with value of `[]`.')
-        })
-    })
-
-    describe('checking - not opinionated on number', () => {
-        const noonumber = Not.createNot({
-            opinionatedOnNumber: false
-        })
-
-        //number x number
-        it('should return false when comparing number', () => {
-            noonumber('number', 1).should.be.false
-        })
-
-        //object x new #Number
-        it('should return false when comparing #Number to object', () => {
-            noonumber('object', new Number('1')).should.be.false
-        })
-
-        //number x new #Number
-        it('should return false when comparing #Number to number', () => {
-            noonumber('number', new Number(1)).should.equal('Wrong Type: Expecting type `number` but got `object` with value of `1`.')
-        })
-
-        //number x new #Number(NaN)
-        it('should still be opinionated and return failure message comparing #Number(NaN) as a number', () => {
-            noonumber('number', new Number(NaN)).should.equal('Wrong Type: Expecting type `number` but got `nan` or `object` with value of `NaN`.')
-        })
-    })
-
-    describe('checking - not opinionated on boolean', () => {
-        const noobool = Not.createNot({
-            opinionatedOnBoolean: false
-        })
-
-        //bool x bool
-        it('should return false when comparing bool', () => {
-            noobool('boolean', true).should.be.false
-        })
-
-        //bool x new #Boolean
-        it('should return false when comparing #Boolean to object', () => {
-            noobool('object', new Boolean(true)).should.be.false
         })
     })
 

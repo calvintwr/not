@@ -7,4 +7,4 @@ test.js
 test.html
 .vscode/*
 .nyc_output/*
-js/*
+dist/node/*

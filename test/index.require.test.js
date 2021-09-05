@@ -1,6 +1,6 @@
 'use strict'
 
-import Not from '../index.js'
+const Not = require('../index.cjs')
 import NotTypeError from '../dist/node/core/NotTypeError.js'
 import chai from 'chai'
 chai.should()

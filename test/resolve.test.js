@@ -2,7 +2,7 @@
 
 import Not from '../index.js'
 import chai from 'chai'
-import NotTypeError from '../js/core/NotTypeError.js'
+import NotTypeError from '../dist/node/core/NotTypeError.js'
 chai.should()
 
 const should = require('chai').should()
@@ -10,7 +10,7 @@ const should = require('chai').should()
 describe('resolve', () => {
 
     const you = Object.create(Not)
-    you.lodge('string', new String())
+    you.lodge('string', 'someString')
 
     it('should resolve callback with payload when all lodged cases pass (payload should be undefined. returns what callback returns)', () => {
         let returned = you.resolve((errors, payload) => { return [ errors, payload ] })
@@ -28,12 +28,16 @@ describe('resolve', () => {
     it('should resolve callback when there are failed lodged cases', () => {
         let errors = you2.resolve(errors => { return errors })
         errors.should.be.an('array')
-        errors.length.should.equal(1)
+        errors.should.include.members([
+            'Wrong Type: Expecting type `string` but got `object` with value of ``.',
+            'Wrong Type: Expecting type `array` but got `object` with value of `{}`.'          
+        ])
+        errors.length.should.equal(2)
     })
 
     const you3 = Object.create(Not)
     you3.willThrowError = true
-    you3.lodge('string', new String())
+    you3.lodge('string', 'someString')
     you3.lodge('function', {})
     it('should throw errors when no callback provided', () => {
         (()=> {

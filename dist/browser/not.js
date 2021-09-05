@@ -45,9 +45,6 @@ var You = {
   opinionatedOnNaN: true,
   opinionatedOnArray: true,
   opinionatedOnNull: true,
-  opinionatedOnString: true,
-  opinionatedOnNumber: true,
-  opinionatedOnBoolean: true,
   _isOpinionated: true // isOpinionated getters and setters
   // A "gang" value that will flip all opinions on/off
   ,
@@ -60,9 +57,6 @@ var You = {
     this.opinionatedOnNaN = value;
     this.opinionatedOnArray = value;
     this.opinionatedOnNull = value;
-    this.opinionatedOnString = value;
-    this.opinionatedOnNumber = value;
-    this.opinionatedOnBoolean = value;
     this._isOpinionated = value;
   } // Define whether will throw errors (true by default)
   ,
@@ -761,10 +755,7 @@ exports.default = function (got, opinionFlags) {
     opinionFlags = {
       opinionatedOnNaN: true,
       opinionatedOnArray: true,
-      opinionatedOnNull: true,
-      opinionatedOnString: true,
-      opinionatedOnNumber: true,
-      opinionatedOnBoolean: true
+      opinionatedOnNull: true
     };
   } // sort out the NaN problem.
 
@@ -780,7 +771,6 @@ exports.default = function (got, opinionFlags) {
 
 
     return _typeof(got);
-  } else if (_typeof(got) === 'object' && got instanceof Number) {// deal with the typeof new Number(NaN) being 'object'
   } // objects... get rid of all the problems typeof [] or null is `object`.
 
 
@@ -797,32 +787,6 @@ exports.default = function (got, opinionFlags) {
       return ['null', 'object'];
     } else {
       return 'null';
-    }
-  }
-
-  if (got instanceof String) {
-    if (opinionFlags.opinionatedOnString === false) {
-      return ['string', 'object'];
-    } else {
-      return 'string';
-    }
-  }
-
-  if (got instanceof Number) {
-    if (opinionFlags.opinionatedOnNumber === false) {
-      if (isNaN(got.valueOf())) return ['nan', 'object'];
-      return ['object'];
-    } else {
-      if (isNaN(got.valueOf())) return 'nan';
-      return 'number';
-    }
-  }
-
-  if (got instanceof Boolean) {
-    if (opinionFlags.opinionatedOnBoolean === false) {
-      return ['boolean', 'object'];
-    } else {
-      return 'boolean';
     }
   }
 

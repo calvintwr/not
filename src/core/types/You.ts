@@ -18,9 +18,6 @@ interface YouType  {
     opinionatedOnNaN    : boolean
     opinionatedOnArray  : boolean
     opinionatedOnNull   : boolean
-    opinionatedOnString : boolean
-    opinionatedOnNumber : boolean
-    opinionatedOnBoolean: boolean
 
     // overall flags
     _isOpinionated  : boolean

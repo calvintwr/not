@@ -11,7 +11,7 @@ const Not = NotProto.create({ throw: false })
 describe('resolve (throw=false)', () => {
 
     const you = Object.create(Not)
-    you.lodge('string', new String())
+    you.lodge('string', 'someString')
     it('should resolve callback with payload when all lodged cases pass (payload should be undefined. returns what callback returns)', () => {
         let returned = you.resolve((errors, payload) => { return [ errors, payload ] })
             returned.should.be.an('array')
@@ -28,7 +28,11 @@ describe('resolve (throw=false)', () => {
     it('should resolve callback when there are failed lodged cases', () => {
         let errors = you2.resolve(errors => { return errors })
         errors.should.be.an('array')
-        errors.length.should.equal(1)
+        errors.should.include.members([
+            'Wrong Type: Expecting type `string` but got `object` with value of ``.',
+            'Wrong Type: Expecting type `array` but got `object` with value of `{}`.'          
+        ])
+        errors.length.should.equal(2)
     })
 
 })

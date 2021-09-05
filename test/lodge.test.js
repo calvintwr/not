@@ -10,7 +10,7 @@ describe('lodge', () => {
 
     it('should have _lodged array of length 1', () => {
         const you = Object.create(Not)
-        you.lodge('string', new String())
+        you.lodge('string', 'validString')
         you.lodge('array', {})
 
         you._lodged.should.be.an('array')

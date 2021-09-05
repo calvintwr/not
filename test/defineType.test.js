@@ -2,7 +2,7 @@
 
 import Not from '../index.js'
 import chai from 'chai'
-import NotTypeError from '../js/core/NotTypeError.js'
+import NotTypeError from '../dist/node/core/NotTypeError.js'
 chai.should()
 
 const should = require('chai').should()

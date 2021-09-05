@@ -1,8 +1,8 @@
 'use strict'
 
-import Not from '../../js/You.js'
-import integer from '../../js/customs/integer.js'
-import NotTypeError from '../../js/core/NotTypeError.js'
+import Not from '../../dist/node/You.js'
+import integer from '../../dist/node/customs/integer.js'
+import NotTypeError from '../../dist/node/core/NotTypeError.js'
 integer(Not)
 import chai from 'chai'
 chai.should()
