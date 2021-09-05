@@ -1,8 +1,3 @@
-/*!
- * You-Are-Not v1.0.1
- * (c) 2020-2021 Calvin Tan
- * Released under the MIT License.
- */
 'use strict'
 
 import print from './lib/print'
