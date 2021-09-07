@@ -67,7 +67,7 @@ let sanitised = Not.scrub(
     payload
 )
 ```
-**API error resNot throws an actionable error message:**
+**Not throws an actionable error message ready for sending back to the requestor:**
 ```
 TypeError (NotTS): Wrong types provided. See `trace`.
     ... stack trace ...
@@ -83,13 +83,13 @@ If you are using express or fastify, thrown errors can be seamlessly used for pr
 //express
 res.status(sanitised.statusCode)
 res.send({
-    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.track.join('\n')}`
+    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.trace.join('\n')}`
 })
 
 //fastify
 reply.code(sanitised.statusCode)
 reply.send({
-    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.track.join('\n')}`
+    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.trace.join('\n')}`
 })
 ```
 This will produce a `400` error with the follow `message` property in response body:
