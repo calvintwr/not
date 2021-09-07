@@ -135,7 +135,7 @@ const is = Not.createIs()
 const notNerfed = Not.create({ throw: false }) // creates an instance that will not throw errors.
 ```
 
-Use *Not* to cuts down runtime type-checking verbiage. Instead of:
+Use *Not* to cut down runtime type-checking verbiage. Instead of:
 
 ```js
 if (typeof foo !== 'string' ||
