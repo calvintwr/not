@@ -1,5 +1,5 @@
 /*!
- * you-are-not v1.0.4
+ * you-are-not v1.0.5
  * (c) 2020-2021 calvintwr
  * Release under MIT license.
  */
@@ -477,9 +477,10 @@ var You = {
     return this.are(expect, got, name, note);
   } // scrub is a shorthand of #checkObject
   ,
-  scrub: function scrub(name, expectObject, gotObject) {
+  scrub: function scrub(name, expectObject, gotObject, exact) {
     return this.checkObject(name, expectObject, gotObject, {
-      returnPayload: true
+      returnPayload: true,
+      exact: exact
     });
   }
 };

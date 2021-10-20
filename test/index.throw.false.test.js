@@ -1,8 +1,6 @@
 'use strict'
 
-//const Not = require('../index.js')
-// ES6
-import NotProto from '../index.js'
+import NotProto from '../index.cjs'
 const Not = NotProto.create({ throw: false })
 
 // ES6 Shorthand

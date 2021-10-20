@@ -64,10 +64,11 @@ const schema = {
 let sanitised = Not.scrub(
     'payloadWithTypeError', // give your payload a name
     schema,
-    payload
+    payload,
+    { exact: true } // use exact: true if you need the payload to match the schema 100%, else, additional properties will be removed without throwing errors.
 )
 ```
-**API error resNot throws an actionable error message:**
+**Not throws an actionable error message ready for sending back to the requestor:**
 ```
 TypeError (NotTS): Wrong types provided. See `trace`.
     ... stack trace ...
@@ -83,13 +84,13 @@ If you are using express or fastify, thrown errors can be seamlessly used for pr
 //express
 res.status(sanitised.statusCode)
 res.send({
-    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.track.join('\n')}`
+    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.trace.join('\n')}`
 })
 
 //fastify
 reply.code(sanitised.statusCode)
 reply.send({
-    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.track.join('\n')}`
+    message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.trace.join('\n')}`
 })
 ```
 This will produce a `400` error with the follow `message` property in response body:
@@ -135,7 +136,7 @@ const is = Not.createIs()
 const notNerfed = Not.create({ throw: false }) // creates an instance that will not throw errors.
 ```
 
-Use *Not* to cuts down runtime type-checking verbiage. Instead of:
+Use *Not* to cut down runtime type-checking verbiage. Instead of:
 
 ```js
 if (typeof foo !== 'string' ||
@@ -201,8 +202,9 @@ Other custom types:
 #checkObject is #scrub under the hood. Use #scrub for simplified usage (example above), and #checkObject when you want more control.
 
 ```js
-Not.scrub(objectName, schema, payload, { exact: true/false} )
-Not.checkObject(objectName, schema, payload, options)
+Not.scrub(objectName, schema, payload, options)
+
+Not.checkObject(objectName, schema, payload, callback/options)
 ```
 
 `objectName`: (string) Name of object.
@@ -211,7 +213,22 @@ Not.checkObject(objectName, schema, payload, options)
 
 `payload`: (object) The payload to check for.
 
-`callback/options`: (function or object | optional). To receive a sanitised payload, set options `returnPayload` to `true` (see examples below).
+`options` (#scrub): (object | optional). Define `exact: true` if you want to throw error if there are additional properties.
+
+`callback/options` (#checkObject): (object | optional). See example below:
+
+```js
+// callback
+Not.checkObject(objectName, schema, payload, (errors, payload) => { /* handle errors yourself*/ })
+
+// options
+Not.checkObject(objectName, schema, payload, {
+    callback: (errors, payload) => { /* handle errors yourself*/ },
+    returnPayload: true/false, // define if you need the payload returned. if not requires, switch to false for better performance
+    exact: true/false // if true, will throw errors if there are additiona properties
+})
+```
+
 
 #### Defining Schema
 
