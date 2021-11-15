@@ -93,7 +93,7 @@ reply.send({
     message: `You have provided erroneous inputs. \n\nMore info:\n${sanitised.trace.join('\n')}`
 })
 ```
-This will produce a `400` error with the follow `message` property in response body:
+This will produce a `400` error with the following `message` property in response body:
 ```
 You have provided erroneous inputs.
 
@@ -213,7 +213,7 @@ Not.checkObject(objectName, schema, payload, callback/options)
 
 `payload`: (object) The payload to check for.
 
-`options` (#scrub): (object | optional). Define `exact: true` if you want to throw error if there are additional properties.
+`options` (#scrub): (object | optional). Define `exact: true` if you want to throw an error if there are additional properties.
 
 `callback/options` (#checkObject): (object | optional). See example below:
 
@@ -270,7 +270,7 @@ Not.checkObject(name, schema, payload, function(errors) {
 
 (Note: When callback is provided, Not assumes you want to handle things yourself, and will not throw errors regardless of the `throw` flag.)
 
-2. If `callback/options` is `{ returnPayload: true }`, `#checkObject` returns (a) the sanitised payload (object) when check passes, (b) or an array of errors if check fails:
+2. If `callback/options` is `{ returnPayload: true }`, `#checkObject` returns (a) the sanitised payload (object) when check passes, or (b) an array of errors if check fails:
 
 ```js
 let sanitised = Not.checkObject(
@@ -347,11 +347,11 @@ Not.defineType(options)
 Not.not(expect, got, name, note)
 Not.is(expect, got, name, note)
 ```
-`expect`: (string or array of strings) The types to check for (see below on "3. Types to check for".
+`expect`: (string or array of strings) The types to check for (see below on "3. Types to check for".)
 
 `got`: (any) This is the the subject/candidate/payload you are checking.
 
-`name`: (string | optional) You can define a name of the subject/candidate/payload, which will be included into the error message.
+`name`: (string | optional) You can define a name of the subject/candidate/payload, which will be included in the error message.
 
 `note`: (string | optional) Any additional notes you wish to add to the error message.
 
@@ -413,7 +413,7 @@ Not.is(['falsey', 'function'], function() {}) // returns true
 
 ### 7. Methods: `#lodge` and `#resolve`
 
-You can also use `#lodge` And `#resolve` to bulk checking with more control:
+You can also use `#lodge` and `#resolve` to bulk checking with more control:
 
 ```js
 // create a descendant
@@ -478,7 +478,7 @@ You can switch off opinionated type-checking:
 ```js
 let not = Not.createNot({ isOpinionated: false })
 ```
-When false, all Javascript the quirks will be restored, on top of *Not*'s opinions: An `Array` will both be an **'array'** as well as **'object'**, and `null` will both be **'null'** and **'object'**:
+When false, all of the Javascript quirks will be restored, on top of *Not*'s opinions: An `Array` will both be an **'array'** as well as **'object'**, and `null` will both be **'null'** and **'object'**:
 ```js
 not('object', []) // returns false -- `[]` is an object
 not('array', []) // returns false -- `[]` is an array
