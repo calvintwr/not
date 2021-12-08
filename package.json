@@ -1,6 +1,6 @@
 {
     "name": "you-are-not",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Runtime type-checking written in TypeScript -- Not is a minimal, blazing fast, intuitive, API-centric, and customisable API payload sanitiser/type-checking/validation/error handing and messaging helper -- all in a small and neat pack.",
     "main": "index.cjs",
     "exports": {
@@ -71,6 +71,7 @@
     "files": [
         "index.cjs",
         "index.mjs",
+        "index.d.ts",
         "src",
         "dist"
     ],
