@@ -156,7 +156,7 @@ const You: YouType = {
         , callback?: {
             callback?: CallbackFn
             , returnPayload?: boolean
-            , exact?: boolean | undefined
+            , exact?: boolean
         } | CallbackFn
 
     ): Object | string {
@@ -610,7 +610,7 @@ const You: YouType = {
         name: string
         , expectObject: GenericObj
         , gotObject: GenericObj
-        , exact?: true
+        , exact?: boolean
 
     ): Object | string {
         return this.checkObject(name, expectObject, gotObject, { returnPayload: true, exact })

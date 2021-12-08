@@ -31,7 +31,7 @@ interface YouType  {
         , callback?: {
             callback?: CallbackFn
             , returnPayload?: boolean
-            , exact?: true
+            , exact?: boolean
         } | CallbackFn
     ) => Object | string
 
@@ -46,7 +46,7 @@ interface YouType  {
         name: string
         , expectObject: GenericObj
         , gotObject: GenericObj
-        , exact?: true
+        , exact?: boolean
         
     ) => Object | string
 
