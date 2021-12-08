@@ -59,7 +59,7 @@ const You: YouType = {
     , are(
         expect: string | string[]
         , got: any
-        , name: string
+        , name?: string
         , note?: string
     ): boolean {
         return !this.areNot(expect, got)
@@ -598,7 +598,7 @@ const You: YouType = {
     , is(
         expect: string | string[]
         , got: any
-        , name: string
+        , name?: string
         , note?: string
     ) {
         return this.are(expect, got, name, note)

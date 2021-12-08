@@ -1,7 +1,7 @@
 type Are = (
     expect: string | string[]
     , got: any
-    , name: string
+    , name?: string
     , note?: string
 ) => boolean 
 
