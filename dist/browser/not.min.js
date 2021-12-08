@@ -1,5 +1,5 @@
 /*!
- * you-are-not v1.0.5
+ * you-are-not v1.0.7
  * (c) 2020-2021 calvintwr
  * Release under MIT license.
  */
