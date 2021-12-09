@@ -62,7 +62,7 @@ const You: YouType = {
         , name?: string
         , note?: string
     ): boolean {
-        return !this.areNot(expect, got)
+        return !this.areNot(expect, got, name, note)
     }
 
     // _are is validation help for internal use. Has a try/catch wrapper to prevent throwing errors.

@@ -58,10 +58,12 @@ function fixStack(
 class NotTypeError extends TypeError {
     trace?: string[] | ReturnType<typeof msgPOJO> | Array<string | boolean | ReturnType<typeof msgPOJO>>
     statusCode?: number
+    internalMessage: string
 
     constructor(message: ReturnType<typeof msgPOJO> | string, statusCode=400, debug?: any) {
         let msgStr = (typeof message === 'string') ? message : message.message
         super(msgStr)
+        this.internalMessage = msgStr
         this.name = 'TypeError (NotTS)' // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
         this.statusCode = statusCode
         if (typeof message === 'object') {
