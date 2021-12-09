@@ -83,7 +83,7 @@ var You = {
   ,
 
   are: function are(expect, got, name, note) {
-    return !this.areNot(expect, got);
+    return !this.areNot(expect, got, name, note);
   } // _are is validation help for internal use. Has a try/catch wrapper to prevent throwing errors.
   ,
   _are: function _are(expect, got, name, note) {
@@ -586,6 +586,7 @@ function (_super) {
 
     var msgStr = typeof message === 'string' ? message : message.message;
     _this = _super.call(this, msgStr) || this;
+    _this.internalMessage = msgStr;
     _this.name = 'TypeError (NotTS)'; // type error, invalid argument, validation error... have been considered. 'Wrong Type' sounds most simple.
 
     _this.statusCode = statusCode;
