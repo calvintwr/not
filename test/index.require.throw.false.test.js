@@ -1,6 +1,6 @@
 'use strict'
 
-const Not = require('../index.cjs').create({ throw: false })
+const Not = require('../index.js').create({ throw: false })
 const should = require('chai').should()
 
 describe('checking (throw=false)', () => {

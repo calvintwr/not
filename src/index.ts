@@ -10,5 +10,4 @@ optional(Not)
 integer(Not)
 
 export default Not
-export { Not, NotTypeError }
-module.exports = Not
+exports = module.exports = Not

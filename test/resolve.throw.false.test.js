@@ -1,6 +1,6 @@
 'use strict'
 
-import NotProto from '../index.cjs'
+import NotProto from '../index.js'
 import chai from 'chai'
 
 chai.should()

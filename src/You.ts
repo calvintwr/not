@@ -616,6 +616,8 @@ const You: YouType = {
         return this.checkObject(name, expectObject, gotObject, { returnPayload: true, exact })
     }
 
+    // expose NotTypeError
+    , NotTypeError
 }
 
 export default You

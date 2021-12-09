@@ -4,6 +4,7 @@ import Are from "./Are"
 import AreNot from "./AreNot"
 import CallbackFn from "./CallbackFn"
 import CreateOptions from "./CreateOptions"
+import NotTypeError from "../NotTypeError"
 
 interface YouType  {
 
@@ -49,7 +50,7 @@ interface YouType  {
         , exact?: boolean
         
     ) => Object | string
-
+    NotTypeError: typeof NotTypeError
 }
 
 export default YouType

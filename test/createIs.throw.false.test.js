@@ -1,6 +1,6 @@
 'use strict'
 
-import Not from '../index.cjs'
+import Not from '../index.js'
 import chai from 'chai'
 
 chai.should()

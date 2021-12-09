@@ -1,5 +1,5 @@
 /*!
- * you-are-not v1.0.10
+ * you-are-not v1.0.11
  * (c) 2020-2021 calvintwr
  * Release under MIT license.
  */
@@ -482,7 +482,9 @@ var You = {
       returnPayload: true,
       exact: exact
     });
-  }
+  } // expose NotTypeError
+  ,
+  NotTypeError: NotTypeError_1.default
 };
 exports.default = You;
 module.exports = You;
@@ -806,15 +808,9 @@ var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.NotTypeError = exports.Not = void 0;
 
-var You_1 = __importDefault(require("./You"));
+var You_1 = __importDefault(require("./You")); //@ts-ignore
 
-exports.Not = You_1.default;
-
-var NotTypeError_1 = __importDefault(require("./core/NotTypeError"));
-
-exports.NotTypeError = NotTypeError_1.default; //@ts-ignore
 
 var optional_js_1 = __importDefault(require("./customs/optional.js")); //@ts-ignore
 
@@ -824,9 +820,9 @@ var integer_js_1 = __importDefault(require("./customs/integer.js"));
 optional_js_1.default(You_1.default);
 integer_js_1.default(You_1.default);
 exports.default = You_1.default;
-module.exports = You_1.default;
+exports = module.exports = You_1.default;
 
-},{"./You":1,"./core/NotTypeError":2,"./customs/integer.js":5,"./customs/optional.js":6}],13:[function(require,module,exports){
+},{"./You":1,"./customs/integer.js":5,"./customs/optional.js":6}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
